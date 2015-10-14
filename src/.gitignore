@@ -1,0 +1,9 @@
+*.o
+*.bin
+*.tmp
+*.ctsko
+*.ctsk
+*.tsko
+*.tsk
+kernel.sym
+diskette.img
