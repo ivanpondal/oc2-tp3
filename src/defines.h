@@ -37,14 +37,15 @@ typedef unsigned int   uint;
 
 /* Offsets en la gdt */
 /* -------------------------------------------------------------------------- */
-#define GDT_OFF_NULL_DESC           (GDT_IDX_NULL_DESC      << 3)
+#define GDT_OFF_NULL_DESC           (GDT_IDX_NULL_DESC			<< 3)
+#define GDT_OFF_KERNEL_CODE_DESC    (GDT_ID8_KERNEL_CODE_DESC	<< 3)
 
 /* Selectores de segmentos */
 /* -------------------------------------------------------------------------- */
-#define GDT_IDX_CODE1_DESC 	8
-#define GDT_IDX_CODE2_DESC	9
-#define GDT_IDX_DATA1_DESC	10
-#define GDT_IDX_DATA2_DESC	11
-#define GDT_IDX_SCREEN_DESC 12
+#define GDT_ID8_KERNEL_CODE_DESC	8
+#define GDT_ID9_USER_CODE_DESC		9
+#define GDT_ID10_KERNEL_DATA_DESC	10
+#define GDT_ID11_USER_DATA_DESC		11
+#define GDT_ID12_SCREEN_DESC		12
 
 #endif  /* !__DEFINES_H__ */

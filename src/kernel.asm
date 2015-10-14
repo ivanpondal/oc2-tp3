@@ -55,7 +55,7 @@ start:
     mov cr0, eax 
 
     ; Saltar a modo protegido
-    jmp 0x40:modoprotegido ;Offset de CODE1
+    jmp 0x40:modoprotegido	; Offset de KERNEL_CODE
 
     BITS 32
     modoprotegido:
