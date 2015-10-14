@@ -11,7 +11,7 @@ section .text
 habilitando: db 'Habilitando A20........'
 habilitando_len equ $ - habilitando
 
-deshabilitando: db 'Desabilitando A20......'
+deshabilitando: db 'Deshabilitando A20......'
 deshabilitando_len equ $ - deshabilitando
 
 checkeando: db 'Checkeando A20.........'

@@ -41,6 +41,9 @@ typedef unsigned int   uint;
 
 /* Selectores de segmentos */
 /* -------------------------------------------------------------------------- */
-
+#define GDT_IDX_CODE1_DESC 	8
+#define GDT_IDX_CODE2_DESC	9
+#define GDT_IDX_DATA1_DESC	10
+#define GDT_IDX_DATA2_DESC	11
 
 #endif  /* !__DEFINES_H__ */
