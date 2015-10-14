@@ -32,7 +32,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned char)     0x00,           /* base[31:24]  */
     },
 
-    [GDT_IDX_CODE1_DESC] = (gdt_entry) {
+    [GDT_ID8_KERNEL_CODE_DESC] = (gdt_entry) {
         (unsigned short)    0xF3FF,         /* limit[0:15]  */
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
@@ -48,7 +48,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned char)     0x00,           /* base[31:24]  */
     },
 
-    [GDT_IDX_CODE2_DESC] = (gdt_entry) {
+    [GDT_ID9_USER_CODE_DESC] = (gdt_entry) {
         (unsigned short)    0xF3FF,         /* limit[0:15]  */
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
@@ -64,7 +64,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned char)     0x00,           /* base[31:24]  */
     },
 
-    [GDT_IDX_DATA1_DESC] = (gdt_entry) {
+    [GDT_ID10_KERNEL_DATA_DESC] = (gdt_entry) {
         (unsigned short)    0xF3FF,         /* limit[0:15]  */
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
@@ -80,7 +80,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned char)     0x00,           /* base[31:24]  */
     },
 
-    [GDT_IDX_DATA2_DESC] = (gdt_entry) {
+    [GDT_ID11_USER_DATA_DESC] = (gdt_entry) {
         (unsigned short)    0xF3FF,         /* limit[0:15]  */
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
