@@ -45,5 +45,6 @@ typedef unsigned int   uint;
 #define GDT_IDX_CODE2_DESC	9
 #define GDT_IDX_DATA1_DESC	10
 #define GDT_IDX_DATA2_DESC	11
+#define GDT_IDX_SCREEN_DESC 12
 
 #endif  /* !__DEFINES_H__ */
