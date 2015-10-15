@@ -5,7 +5,8 @@
 
 %include "imprimir.mac"
 extern GDT_DESC
-;extern habilitar_A20
+extern screen_pintar
+extern screen_inicializar
 
 global start
 
@@ -42,7 +43,6 @@ start:
     ; Imprimir mensaje de bienvenida
     imprimir_texto_mr iniciando_mr_msg, iniciando_mr_len, 0x07, 0, 0
 
-
     ; Habilitar A20
     call habilitar_A20
 
@@ -55,21 +55,30 @@ start:
     mov cr0, eax 
 
     ; Saltar a modo protegido
-    xchg bx, bx
     jmp 0x40:modoprotegido	; Offset de KERNEL_CODE
 
     BITS 32
     modoprotegido:
 
     ; Establecer selectores de segmentos
-    ;mov ds, 
+    mov ax, 0x50	; 0x50 selector KERNEL_DATA
+    mov ds, ax
+    mov es, ax
+    mov gs, ax
+    mov fs, ax
+    mov ss, ax
+
     ; Establecer la base de la pila
+    mov ebp, 0x27000
+    mov esp, ebp
 
     ; Imprimir mensaje de bienvenida
+    imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 2, 0
 
     ; Inicializar el juego
 
     ; Inicializar pantalla
+    call screen_inicializar
 
     ; Inicializar el manejador de memoria
 
@@ -108,3 +117,4 @@ start:
 ;; -------------------------------------------------------------------------- ;;
 
 %include "a20.asm"
+
