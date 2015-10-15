@@ -61,31 +61,25 @@ start:
     modoprotegido:
 
     ; Establecer selectores de segmentos
-    mov ax, 0x50	;0x50 selector CODE1
+    mov ax, 0x50	; 0x50 selector KERNEL_DATA
     mov ds, ax
+    mov es, ax
+    mov gs, ax
+    mov fs, ax
     mov ss, ax
+
     ; Establecer la base de la pila
-    mov esp, 0x27000
+    mov ebp, 0x27000
+    mov esp, ebp
+
     ; Imprimir mensaje de bienvenida
     imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 2, 0
-    ;--------------PRUEBA---------------;
-    ;Igual creo que no hace exactamente lo que quieren que hagamos
-    ; mov ax, 0x60
-    ; mov ds, ax
-
-    ; push 0
-    ; push 0
-    ; push 0x4
-    ; push 'I'
-    ; call screen_pintar
-    ; add esp, 0xf
-
-    ;-------------FIN PRUEBA------------;
 
     ; Inicializar el juego
 
     ; Inicializar pantalla
     call screen_inicializar
+
     ; Inicializar el manejador de memoria
 
     ; Inicializar el directorio de paginas
