@@ -78,6 +78,7 @@ start:
     ; Inicializar el juego
 
     ; Inicializar pantalla
+	call pintar_esquina_superior_izquierda
     call screen_inicializar
 
     ; Inicializar el manejador de memoria
@@ -115,6 +116,15 @@ start:
     jmp $
 
 ;; -------------------------------------------------------------------------- ;;
+
+pintar_esquina_superior_izquierda:
+	mov ax, 0x60	; Offset de SCREEN
+	mov ds, ax
+	mov byte [0x0], 'X'
+	mov byte [0x1], 0x4
+	mov ax, 0x50	; Offset de KERNEL_DATA
+	mov ds, ax
+	ret
 
 %include "a20.asm"
 
