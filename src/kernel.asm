@@ -5,8 +5,10 @@
 
 %include "imprimir.mac"
 extern GDT_DESC
+extern IDT_DESC
 extern screen_pintar
 extern screen_inicializar
+extern idt_inicializar
 
 global start
 
@@ -62,7 +64,7 @@ start:
 
     ; Establecer selectores de segmentos
     mov ax, 0x50	; 0x50 selector KERNEL_DATA
-    mov ds, ax
+	mov ds, ax
     mov es, ax
     mov gs, ax
     mov fs, ax
@@ -82,8 +84,14 @@ start:
     call screen_inicializar
 
     ; Inicializar el manejador de memoria
+    call idt_inicializar
 
     ; Inicializar el directorio de paginas
+    lidt [IDT_DESC]
+
+    ;Genera excepción 0x00
+    xor esi, esi
+    div esi
 
     ; Cargar directorio de paginas
 
