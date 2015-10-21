@@ -1,0 +1,76 @@
+\subsection{Paginación básica}
+
+Aquí contaremos los pasos necesarios para poder activar la paginación y que esta
+esté configurada para realizar \textit{identity mapping}. Este término se
+utiliza para describir un direccionamiento de memoria donde la dirección virtual
+coincide uno a uno con la física.
+
+Las páginas que definimos nos mapean las direcciones
+\texttt{0x00000000} a \texttt{0x003FFFFF}, el directorio de páginas se encuentra
+en la dirección \texttt{0x27000} y la tabla de páginas en \texttt{0x28000}.
+
+\subsubsection{Rutinas de mapeado y desmapeado}
+
+Escribimos dos rutinas para realizar la tarea, la de mapeado que nos permite
+asociar una dirección virtual con una física, y la de desmapeado que dada una
+dirección virtual la desasocia de memoria.
+
+\subsubsection*{Mapeado}
+
+La función \texttt{mmu\_mapear\_pagina} toma como parámetros la dirección \texttt{virtual}, el contenido del
+registro \texttt{cr3}, la dirección \texttt{física} y por último los atributos
+\texttt{attrs}.
+
+\begin{enumerate}
+	\item Extraemos la dirección del directorio de tablas de \texttt{cr3}.
+	\begin{lstlisting}
+	base_directorio_tablas = 0xFFFFF000 AND cr3
+	\end{lstlisting}
+
+	\item Calculamos el offset dentro del directorio de tablas en base a
+	\texttt{virtual}.
+	\begin{lstlisting}
+	offset_directorio_tablas = ((0xFFC00000 AND virtual) >> 22) << 2
+	\end{lstlisting}
+
+	\item Obtenemos el Page Directory Entry correspondiente.
+	\begin{lstlisting}
+	pde = *(base_directorio_tablas + offset_directorio_tablas)
+	\end{lstlisting}
+
+	\item Extraemos la dirección del directorio de páginas de \texttt{pde}.
+	\begin{lstlisting}
+	base_directorio_paginas = 0xFFFFF000 AND pde
+	\end{lstlisting}
+
+	\item Calculamos el offset dentro del directorio de páginas en base a
+	\texttt{virtual}.
+	\begin{lstlisting}
+	offset_directorio_paginas = ((0x003FF000 AND virtual) >> 12) << 2
+	\end{lstlisting}
+
+	\item Obtenemos el puntero al Page Table Entry correspondiente.
+	\begin{lstlisting}
+	ptr_pte = base_directorio_paginas + offset_directorio_paginas
+	\end{lstlisting}
+
+	\item Asignamos al Page Table Entry la dirección de la \texttt{física} y los
+	atributos \texttt{attrs}.
+	\begin{lstlisting}
+	*ptr_pte = (0xFFFFF000 AND fisica) OR attrs
+	\end{lstlisting}
+\end{enumerate}
+
+\subsubsection*{Desmapeado}
+
+La función \texttt{mmu\_unmapear\_pagina} toma como parámetros la dirección
+\texttt{virtual} y el contenido del registro \texttt{cr3}. Los primeros 6 pasos
+serán idénticos a los de \texttt{mmu\_mapear\_pagina}.
+
+\begin{enumerate}
+	\setcounter{enumi}{6}
+	\item Seteamos en el Page Table Entry el bit de \texttt{present} en 0.
+	\begin{lstlisting}
+	*ptr_pte = *ptr_pte AND 0xFFFFFFFE
+	\end{lstlisting}
+\end{enumerate}
