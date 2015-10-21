@@ -86,18 +86,16 @@ start:
     call screen_inicializar
 
     ; Inicializar el manejador de memoria
-    call idt_inicializar
+    
 
     ; Inicializar el directorio de paginas
-    lidt [IDT_DESC]
+    call mmu_inicializar_dir_kernel
 
     ; Cargar directorio de paginas
-	call mmu_inicializar_dir_kernel
+    mov eax, 0x00027000
+    mov cr3, eax
 
     ; Habilitar paginacion
-	mov eax, 0x00027000
-	mov cr3, eax
-
     mov eax, cr0
     or eax, 0x80000000
     mov cr0, eax
@@ -109,8 +107,10 @@ start:
     ; Inicializar el scheduler
 
     ; Inicializar la IDT
+    call idt_inicializar
 
     ; Cargar IDT
+    lidt [IDT_DESC]
 
     ; Configurar controlador de interrupciones
 

@@ -29,7 +29,8 @@ uint mmu_inicializar_dir_kernel(){
 	*ptr_pde = *ptr_pde | BASE_DIR_PAGINAS_0;
 
 	uint direccion_pagina;
-	for(uint i = 0; i < 1024; i++){
+	uint i;
+	for(i = 0; i < 1024; i++){
 		direccion_pagina = i << 12;
 		mmu_mapear_pagina(direccion_pagina, BASE_DIR_TABLAS, direccion_pagina, 0x3);
 	}
