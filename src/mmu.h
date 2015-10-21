@@ -16,6 +16,9 @@
 #define MAPA_BASE_FISICA  0x500000
 #define MAPA_BASE_VIRTUAL 0x800000
 
+#define BASE_DIR_TABLAS		0x27000
+#define BASE_DIR_PAGINAS_0	0x28000
+
 void mmu_inicializar();
 
 

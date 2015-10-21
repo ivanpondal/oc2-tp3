@@ -9,6 +9,8 @@ extern IDT_DESC
 extern screen_pintar
 extern screen_inicializar
 extern idt_inicializar
+extern mmu_inicializar_dir_kernel
+extern mmu_unmapear_pagina
 
 global start
 
@@ -89,13 +91,16 @@ start:
     ; Inicializar el directorio de paginas
     lidt [IDT_DESC]
 
-    ;Genera excepción 0x00
-    xor esi, esi
-    div esi
-
     ; Cargar directorio de paginas
+	call mmu_inicializar_dir_kernel
 
     ; Habilitar paginacion
+	mov eax, 0x00027000
+	mov cr3, eax
+
+    mov eax, cr0
+    or eax, 0x80000000
+    mov cr0, eax
 
     ; Inicializar tss
 
