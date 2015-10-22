@@ -74,3 +74,63 @@ serán idénticos a los de \texttt{mmu\_mapear\_pagina}.
 	*ptr_pte = *ptr_pte AND 0xFFFFFFFE
 	\end{lstlisting}
 \end{enumerate}
+
+\subsubsection{Generación del directorio de páginas}
+
+Para mapear las direcciones solicitadas, desarrollamos la función
+\texttt{mmu\_inicializar\_dir\_kernel} que se encarga de generar la primer
+entrada en el directorio de tablas y su tabla de páginas asociada.
+
+\begin{enumerate}
+	\item Primero creamos nuestro Page Directory Entry en la dirección
+		\texttt{0x27000}.
+	\begin{lstlisting}
+	ptr_pde = 0x27000
+	*ptr_pde = 0 // Limpiamos la entrada
+	*ptr_pde = *ptr_pde OR 0x3 // Asignamos atributos
+	\end{lstlisting}
+	El número \texttt{0x3} equivale en binario a \texttt{11}. Estos dos primeros
+	bits encendidos corresponden dentro del Page Directory Entry a que el
+	directorio de páginas estará presente y que además podrá ser leído y
+	escrito.
+	\begin{lstlisting}
+	*ptr_pde = *ptr_pde OR 0x28000 // Asignamos direccion
+	\end{lstlisting}
+
+	\item Llenamos el directorio de páginas aplicándole a cada entrada los
+		mismos atributos descritos en el punto anterior.
+	\begin{lstlisting}
+	Para i de 0 a 1024
+		direccion_pagina = i << 12
+		mmu_mapear_pagina(direccion_pagina, 0x27000, direccion_pagina, 0x3)
+	Fin para
+	\end{lstlisting}
+\end{enumerate}
+
+\subsubsection{Activación de la paginación}
+
+Finalmente, teniendo las rutinas explicadas previamente, procedimos a activar la
+paginación en el procesador. El código siguiente corresponde a una sección del
+kernel.
+
+\begin{enumerate}
+	\item Llamamos a nuestra rutina de inicialización del directorio de tablas
+	\begin{lstlisting}
+	call mmu_inicializar_dir_kernel
+	\end{lstlisting}
+
+	\item Cargamos la dirección del directorio de tablas en el registro
+		\texttt{cr3}.
+	\begin{lstlisting}
+	mov eax, 0x00027000
+	mov cr3, eax
+	\end{lstlisting}
+
+	\item Activamos la paginación encendiendo el bit más significativo del
+		registro \texttt{cr0}.
+	\begin{lstlisting}
+	mov eax, cr0
+	or eax, 0x80000000
+	mov cr0, eax
+	\end{lstlisting}
+\end{enumerate}
