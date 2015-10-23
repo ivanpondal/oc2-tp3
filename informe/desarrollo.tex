@@ -1,3 +1,37 @@
+\subsection{Interrupciones básicas}
+En esta sección explicaremos como realizamos la creación de la \textit{Interrupt Descriptors Table} (IDT) y su posterior carga en el \textit{kernel}.
+
+\subsubsection{Inicialización de la IDT}
+La IDT es un arreglo de tamaño 255 de \texttt{idt\_entry}, la cual posee los campos a setear de una \textit{interrupt gate}. Como en este apartado solo nos interesa asociar las excepciones internas del procesador, únicamente generamos las primeras 20 entradas de la tabla, siguiendo el cuadro (????). Para inicializarla, utilizamos la función \texttt{idt\_inicializar} definida en \texttt{idt.c}, y cuya implementación se basa en llamar 20 veces al macro \texttt{IDT\_ENTRY}, definido en el mismo archivo, con los respectivos números de la excepción y el privilegio del descriptor (que en este caso querremos que sea siempre 0, pues es el \textit{kernel} quien manejará estas excepciones).
+
+La principal tarea de esta sección es, entonces, configurar correctamente la macro \texttt{IDT\_ENTRY}. También tendremos definidas 20 rutinas de atención para cada excepción, aunque de momento lo único que harán es mover el número de la excepción a \texttt{eax} y detener la ejecución del sistema. En el futuro, la rutina se encargará de desalojar la tarea que produjo la excepción y continuar con la ejecución.
+En la figura (\ref{fig:interrupt-gate}) mostramos como seteamos la entrada de la IDT correspondiente a la excepción $n$ del procesador.
+\vspace{1em}
+
+\begin{figure}[H]
+\begin{center}
+\begin{bytefield}[endianness=big,bitwidth=0.03125\linewidth]{32}
+	\bitheader{0,4,5,7,8,12,13,14,15,16,31}\\
+	\bitbox{16}{\texttt{\&\_isr}\emph{n}[31:16]} & \bitbox{1}{1} & \bitbox{2}{00} & \bitbox{1}{0} & \bitbox{1}{1} & \bitbox{3}{110} & \bitbox{3}{000} & \bitbox{5}{00000} \\
+  	\bitbox{16}{Offset (parte alta)} & \bitbox{1}{P} & \bitbox{2}{DPL} & \bitbox{1}{cero} & \bitbox{1}{D} & \bitbox{3}{\footnotesize Interrupt gate} & \bitbox{3}{ceros} & \bitbox{5}{Reserved} \\
+\end{bytefield}
+
+\begin{bytefield}[endianness=big,bitwidth=0.03125\linewidth]{32}
+	\bitheader{0,16,31}\\
+	\bitbox{16}{0x40} & \bitbox{16}{\texttt{\&\_isr}\emph{n}[15:0]}\\
+  	\bitbox{16}{Segment Selector} & \bitbox{16}{Offset (parte baja)}\\
+\end{bytefield}
+\end{center}
+\caption{Interrupt gate correspondiente a la excepción $n$ del procesador. \texttt{\_isr}$n$ es la rutina de atención de la interrupción $n$, mientras que \&\texttt{\_isr}$n$ es la dirección donde se encuentra alojada la misma; el bit D en 1 indica que el gate es de 32bits}  
+\label{fig:interrupt-gate}
+\end{figure}
+
+\subsubsection{Carga de la IDT}
+Para cargar el descriptor de la IDT al IDTR usamos la operación \texttt{lidt} de la siguiente forma desde el \texttt{kernel.asm}
+\begin{lstlisting}
+	lidt [IDT_DESC]
+\end{lstlisting}
+
 \subsection{Paginación básica}
 
 Aquí contaremos los pasos necesarios para poder activar la paginación y que esta
@@ -72,5 +106,65 @@ serán idénticos a los de \texttt{mmu\_mapear\_pagina}.
 	\item Seteamos en el Page Table Entry el bit de \texttt{present} en 0.
 	\begin{lstlisting}
 	*ptr_pte = *ptr_pte AND 0xFFFFFFFE
+	\end{lstlisting}
+\end{enumerate}
+
+\subsubsection{Generación del directorio de páginas}
+
+Para mapear las direcciones solicitadas, desarrollamos la función
+\texttt{mmu\_inicializar\_dir\_kernel} que se encarga de generar la primer
+entrada en el directorio de tablas y su tabla de páginas asociada.
+
+\begin{enumerate}
+	\item Primero creamos nuestro Page Directory Entry en la dirección
+		\texttt{0x27000}.
+	\begin{lstlisting}
+	ptr_pde = 0x27000
+	*ptr_pde = 0 // Limpiamos la entrada
+	*ptr_pde = *ptr_pde OR 0x3 // Asignamos atributos
+	\end{lstlisting}
+	El número \texttt{0x3} equivale en binario a \texttt{11}. Estos dos primeros
+	bits encendidos corresponden dentro del Page Directory Entry a que el
+	directorio de páginas estará presente y que además podrá ser leído y
+	escrito.
+	\begin{lstlisting}
+	*ptr_pde = *ptr_pde OR 0x28000 // Asignamos direccion
+	\end{lstlisting}
+
+	\item Llenamos el directorio de páginas aplicándole a cada entrada los
+		mismos atributos descritos en el punto anterior.
+	\begin{lstlisting}
+	Para i de 0 a 1024
+		direccion_pagina = i << 12
+		mmu_mapear_pagina(direccion_pagina, 0x27000, direccion_pagina, 0x3)
+	Fin para
+	\end{lstlisting}
+\end{enumerate}
+
+\subsubsection{Activación de la paginación}
+
+Finalmente, teniendo las rutinas explicadas previamente, procedimos a activar la
+paginación en el procesador. El código siguiente corresponde a una sección del
+kernel.
+
+\begin{enumerate}
+	\item Llamamos a nuestra rutina de inicialización del directorio de tablas
+	\begin{lstlisting}
+	call mmu_inicializar_dir_kernel
+	\end{lstlisting}
+
+	\item Cargamos la dirección del directorio de tablas en el registro
+		\texttt{cr3}.
+	\begin{lstlisting}
+	mov eax, 0x00027000
+	mov cr3, eax
+	\end{lstlisting}
+
+	\item Activamos la paginación encendiendo el bit más significativo del
+		registro \texttt{cr0}.
+	\begin{lstlisting}
+	mov eax, cr0
+	or eax, 0x80000000
+	mov cr0, eax
 	\end{lstlisting}
 \end{enumerate}

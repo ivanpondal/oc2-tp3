@@ -20,6 +20,26 @@
 /* Direcciones fisicas de directorios y tablas de paginas del KERNEL */
 /* -------------------------------------------------------------------------- */
 
+void mmu_inicializar(){
+	contador = 0x100000;
+} 
+
+uint mmu_proxima_pagina_fisica_libre(){
+	contador += 0x1000;
+	return (contador - 0x1000);
+}
+
+void mmu_inicializar_pagina(uint * pagina){
+	uint i;
+	for(i = 0; i < 4096; i++){
+		pagina[i] = 0;
+	}
+}
+
+void mmu_copiar_pagina(uint src, uint dst){
+
+}
+
 uint mmu_inicializar_dir_kernel(){
 
 	// Inicializo PDE
@@ -29,7 +49,8 @@ uint mmu_inicializar_dir_kernel(){
 	*ptr_pde = *ptr_pde | BASE_DIR_PAGINAS_0;
 
 	uint direccion_pagina;
-	for(uint i = 0; i < 1024; i++){
+	uint i;
+	for(i = 0; i < 1024; i++){
 		direccion_pagina = i << 12;
 		mmu_mapear_pagina(direccion_pagina, BASE_DIR_TABLAS, direccion_pagina, 0x3);
 	}
@@ -44,10 +65,18 @@ void mmu_mapear_pagina(uint virtual, uint cr3, uint fisica, uint attrs){
 	uint pde = *ptr_pde;
 
 	uint base_directorio_paginas = 0xFFFFF000 & pde;
+	if ((pde & 0x1) == 0){
+		uint pt = mmu_proxima_pagina_fisica_libre();
+		mmu_inicializar_pagina(&pt);
+		*ptr_pde = pt;
+	}
+
+	*ptr_pde = 0x3 | *ptr_pde;  //Seteamos el present y el write en el pde, 
+								//para poder modificar el pte
 	uint offset_directorio_paginas = 4*((0x003FF000 & virtual) >> 12);
 	uint* ptr_pte = (uint*)(base_directorio_paginas + offset_directorio_paginas);
-
 	*ptr_pte = (0xFFFFF000 & fisica) | attrs;
+	tlbflush();					//Vaciamos la TLB 
 }
 
 uint mmu_unmapear_pagina(uint virtual, uint cr3){
@@ -61,6 +90,7 @@ uint mmu_unmapear_pagina(uint virtual, uint cr3){
 	uint* ptr_pte = (uint*)(base_directorio_paginas + offset_directorio_paginas);
 
 	*ptr_pte = *ptr_pte & 0xFFFFFFFE;
+	tlbflush();
 
 	return 0;
 }

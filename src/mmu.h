@@ -19,6 +19,8 @@
 #define BASE_DIR_TABLAS		0x27000
 #define BASE_DIR_PAGINAS_0	0x28000
 
+uint contador;
+
 void mmu_inicializar();
 
 
@@ -29,7 +31,7 @@ uint mmu_proxima_pagina_fisica_libre();
 void mmu_inicializar_pagina(uint * pagina);
 
 // copia los bytes
-void mmu_copiar_pagina    (uint src, uint dst);
+void mmu_copiar_pagina(uint src, uint dst);
 
 // pide una pagina para usar de directorio. Luego inicializa las entradas que iran con identity mapping.
 uint mmu_inicializar_dir_kernel();
