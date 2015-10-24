@@ -2,7 +2,7 @@
 En esta sección explicaremos como realizamos la creación de la \textit{Interrupt Descriptors Table} (IDT) y su posterior carga en el \textit{kernel}.
 
 \subsubsection{Inicialización de la IDT}
-La IDT es un arreglo de tamaño 255 de \texttt{idt\_entry}, la cual posee los campos a setear de una \textit{interrupt gate}. Como en este apartado solo nos interesa asociar las excepciones internas del procesador, únicamente generamos las primeras 20 entradas de la tabla, siguiendo el cuadro (????). Para inicializarla, utilizamos la función \texttt{idt\_inicializar} definida en \texttt{idt.c}, y cuya implementación se basa en llamar 20 veces al macro \texttt{IDT\_ENTRY}, definido en el mismo archivo, con los respectivos números de la excepción y el privilegio del descriptor (que en este caso querremos que sea siempre 0, pues es el \textit{kernel} quien manejará estas excepciones).
+La IDT es un arreglo de tamaño 255 de \texttt{idt\_entry}, la cual posee los campos a setear de una \textit{interrupt gate}. Como en este apartado solo nos interesa asociar las excepciones internas del procesador, únicamente generamos las primeras 20 entradas de la tabla, siguiendo la tabla 6-1 del tercer volumen del manual de Intel \footnote{Intel 64 and IA-32 Architectures Software Developer's Manual, Volume 3: System programming guide, Chapter 6}. Para inicializarla, utilizamos la función \texttt{idt\_inicializar} definida en \texttt{idt.c}, y cuya implementación se basa en llamar 20 veces al macro \texttt{IDT\_ENTRY}, definido en el mismo archivo, con los respectivos números de la excepción y el privilegio del descriptor (que en este caso querremos que sea siempre 0, pues es el \textit{kernel} quien manejará estas excepciones).
 
 La principal tarea de esta sección es, entonces, configurar correctamente la macro \texttt{IDT\_ENTRY}. También tendremos definidas 20 rutinas de atención para cada excepción, aunque de momento lo único que harán es mover el número de la excepción a \texttt{eax} y detener la ejecución del sistema. En el futuro, la rutina se encargará de desalojar la tarea que produjo la excepción y continuar con la ejecución.
 En la figura (\ref{fig:interrupt-gate}) mostramos como seteamos la entrada de la IDT correspondiente a la excepción $n$ del procesador.
@@ -13,7 +13,7 @@ En la figura (\ref{fig:interrupt-gate}) mostramos como seteamos la entrada de la
 \begin{bytefield}[endianness=big,bitwidth=0.03125\linewidth]{32}
 	\bitheader{0,4,5,7,8,12,13,14,15,16,31}\\
 	\bitbox{16}{\texttt{\&\_isr}\emph{n}[31:16]} & \bitbox{1}{1} & \bitbox{2}{00} & \bitbox{1}{0} & \bitbox{1}{1} & \bitbox{3}{110} & \bitbox{3}{000} & \bitbox{5}{00000} \\
-  	\bitbox{16}{Offset (parte alta)} & \bitbox{1}{P} & \bitbox{2}{DPL} & \bitbox{1}{cero} & \bitbox{1}{D} & \bitbox{3}{\footnotesize Interrupt gate} & \bitbox{3}{ceros} & \bitbox{5}{Reserved} \\
+  	\bitbox{16}{Offset (parte alta)} & \bitbox{1}{P} & \bitbox{2}{DPL} & \bitbox{1}{M} & \bitbox{1}{D} & \bitbox{3}{\footnotesize Interrupt gate} & \bitbox{3}{M} & \bitbox{5}{Reserved} \\
 \end{bytefield}
 
 \begin{bytefield}[endianness=big,bitwidth=0.03125\linewidth]{32}
@@ -22,12 +22,15 @@ En la figura (\ref{fig:interrupt-gate}) mostramos como seteamos la entrada de la
   	\bitbox{16}{Segment Selector} & \bitbox{16}{Offset (parte baja)}\\
 \end{bytefield}
 \end{center}
-\caption{Interrupt gate correspondiente a la excepción $n$ del procesador. \texttt{\_isr}$n$ es la rutina de atención de la interrupción $n$, mientras que \&\texttt{\_isr}$n$ es la dirección donde se encuentra alojada la misma; el bit D en 1 indica que el gate es de 32bits}  
+\caption{Interrupt gate correspondiente a la excepción $n$ del procesador. \texttt{\_isr}$n$ es la rutina de atención de la interrupción $n$, mientras que \&\texttt{\_isr}$n$ es la dirección donde se encuentra alojada la misma; el bit D en 1 indica que el gate es de 32bits. La M implica que el manual pide que esos bits estén seteados de esa forma.}  
 \label{fig:interrupt-gate}
 \end{figure}
 
+Es importante destacar que el selector de segmento 0x40 corresponde a un segmento de código, pues recordemos que lo que esperamos encontrar en la dirección 0x40:\texttt{\&\_isr}\emph{n} es el código de un \textit{handler} de interrupción.
+Además, el segmento requiere privilegio de \textit{kernel}, lo cual es razonable pues esperamos que sea este quien resuelva las excepciones. 
+
 \subsubsection{Carga de la IDT}
-Para cargar el descriptor de la IDT al IDTR usamos la operación \texttt{lidt} de la siguiente forma desde el \texttt{kernel.asm}
+Para cargar el descriptor de la IDT (compuesto por su posición base y su tamaño) al IDTR usamos la operación \texttt{lidt} de la siguiente forma desde \texttt{kernel.asm}
 \begin{lstlisting}
 	lidt [IDT_DESC]
 \end{lstlisting}
