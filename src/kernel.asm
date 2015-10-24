@@ -9,6 +9,7 @@ extern IDT_DESC
 extern screen_pintar
 extern screen_inicializar
 extern idt_inicializar
+extern mmu_inicializar
 extern mmu_inicializar_dir_kernel
 extern mmu_unmapear_pagina
 
@@ -86,7 +87,7 @@ start:
     call screen_inicializar
 
     ; Inicializar el manejador de memoria
-    
+    call mmu_inicializar
 
     ; Inicializar el directorio de paginas
     call mmu_inicializar_dir_kernel
