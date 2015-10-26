@@ -70,6 +70,7 @@ void mmu_mapear_pagina(uint virtual, uint cr3, uint fisica, uint attrs){
 	}
 
 	*ptr_pde = 0x3 | *ptr_pde;	// Seteamos el present y el write en el pde, para poder modificar el pte
+	pde = *ptr_pde;
 	uint base_directorio_paginas = 0xFFFFF000 & pde;
 
 	uint offset_directorio_paginas = 4*((0x003FF000 & virtual) >> 12);
