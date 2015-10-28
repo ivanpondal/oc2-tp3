@@ -92,9 +92,11 @@ registro \texttt{cr3}, la dirección \texttt{física} y por último los atributo
 	\end{lstlisting}
 
 	\item Asignamos al Page Table Entry la dirección de la \texttt{física} y los
-	atributos \texttt{attrs}.
+	atributos \texttt{attrs} y forzamos que se limpien las tablas cacheadas para
+	evitar la posibilidad de estar leyendo una entrada desactualizada.
 	\begin{lstlisting}
 	*ptr_pte = (0xFFFFF000 AND fisica) OR attrs
+	Limpio cache de tablas
 	\end{lstlisting}
 \end{enumerate}
 
@@ -106,9 +108,11 @@ serán idénticos a los de \texttt{mmu\_mapear\_pagina}.
 
 \begin{enumerate}
 	\setcounter{enumi}{6}
-	\item Seteamos en el Page Table Entry el bit de \texttt{present} en 0.
+	\item Seteamos en el Page Table Entry el bit de \texttt{present} en 0 y
+		limpamos las tablas cacheadas para reflejar los cambios.
 	\begin{lstlisting}
 	*ptr_pte = *ptr_pte AND 0xFFFFFFFE
+	Limpio cache de tablas
 	\end{lstlisting}
 \end{enumerate}
 
@@ -122,16 +126,16 @@ entrada en el directorio de tablas y su tabla de páginas asociada.
 	\item Primero creamos nuestro Page Directory Entry en la dirección
 		\texttt{0x27000}.
 	\begin{lstlisting}
-	ptr_pde = 0x27000
-	*ptr_pde = 0 // Limpiamos la entrada
-	*ptr_pde = *ptr_pde OR 0x3 // Asignamos atributos
+	ptr_pd = 0x27000
+	*ptr_pd = 0 // Limpiamos la entrada
+	*ptr_pd = *ptr_pd OR 0x3 // Asignamos atributos
 	\end{lstlisting}
 	El número \texttt{0x3} equivale en binario a \texttt{11}. Estos dos primeros
 	bits encendidos corresponden dentro del Page Directory Entry a que el
 	directorio de páginas estará presente y que además podrá ser leído y
 	escrito.
 	\begin{lstlisting}
-	*ptr_pde = *ptr_pde OR 0x28000 // Asignamos direccion
+	*ptr_pd = *ptr_pd OR 0x28000 // Asignamos direccion
 	\end{lstlisting}
 
 	\item Llenamos el directorio de páginas aplicándole a cada entrada los
