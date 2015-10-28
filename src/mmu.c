@@ -24,8 +24,8 @@ void mmu_inicializar(){
 } 
 
 uint mmu_proxima_pagina_fisica_libre(){
-	contador += 0x1000;
-	return (contador - 0x1000);
+	contador += PAGE_SIZE;
+	return (contador - PAGE_SIZE);
 }
 
 void mmu_inicializar_pagina(uint * pagina){
@@ -61,11 +61,11 @@ uint mmu_inicializar_dir_kernel(){
 }
 
 uint mmu_xy2fisica(uint x, uint y){
-	return MAPA_BASE_FISICA + 4096*(80*y + x);
+	return MAPA_BASE_FISICA + PAGE_SIZE*(MAPA_ANCHO*y + x);
 }
 
 uint mmu_xy2virtual(uint x, uint y){
-	return MAPA_BASE_VIRTUAL + 4096*(80*y + x);
+	return MAPA_BASE_VIRTUAL + PAGE_SIZE*(MAPA_ANCHO*y + x);
 }
 
 uint mmu_inicializar_memoria_perro(perro_t *perro, int index_jugador, int index_tipo){
@@ -96,12 +96,13 @@ uint mmu_inicializar_memoria_perro(perro_t *perro, int index_jugador, int index_
 	mmu_mapear_pagina_base(CODIGO_BASE, base_directorio_tablas_perro, base_dir_fisica_codigo, 0x7, 0x7);
 
 	// Mapeamos memoria compartida
-	uint direccion_compartida = (index_jugador == 0) ? COMPARTIDA_A_BASE : COMPARTIDA_B_BASE;
+	uint direccion_compartida = (index_jugador == JUGADOR_A) ? COMPARTIDA_A_BASE : COMPARTIDA_B_BASE;
 	mmu_mapear_pagina_base(COMPARTIDA_BASE, base_directorio_tablas_perro, direccion_compartida, 0x7, 0x7);
 
 	// Mapeamos en kernel y copiamos código
 	mmu_mapear_pagina(base_dir_virtual_codigo, BASE_DIR_TABLAS, base_dir_fisica_codigo, 0x3);
-	uint direccion_codigo = (index_jugador == 0) ? 0x10000 + 0x1000*index_tipo : 0x12000 + 0x1000*index_tipo;
+	uint direccion_codigo = (index_jugador == JUGADOR_A) ?
+		CODIGO_A_BASE + PAGE_SIZE*index_tipo : CODIGO_B_BASE + PAGE_SIZE*index_tipo;
 	mmu_copiar_pagina(direccion_codigo, base_dir_virtual_codigo);
 	mmu_unmapear_pagina(base_dir_virtual_codigo, BASE_DIR_TABLAS);
 
