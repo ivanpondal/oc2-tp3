@@ -11,7 +11,11 @@
 #include "defines.h"
 #include "game.h"
 
-#define CODIGO_BASE       0X401000
+#define COMPARTIDA_BASE   0x400000
+#define CODIGO_BASE       0x401000
+#define COMPARTIDA_A_BASE 0x100000
+#define COMPARTIDA_B_BASE 0x101000
+#define CONTADOR_BASE     0x102000
 
 #define MAPA_BASE_FISICA  0x500000
 #define MAPA_BASE_VIRTUAL 0x800000
@@ -49,7 +53,8 @@ uint mmu_inicializar_memoria_perro(perro_t *perro, int index_jugador, int index_
 void mmu_mover_perro(perro_t *perro, int viejo_x, int viejo_y);
 
 
-void mmu_mapear_pagina  (uint virtual, uint cr3, uint fisica, uint attrs);
+void mmu_mapear_pagina		(uint virtual, uint cr3, uint fisica, uint attrs_pte);
+void mmu_mapear_pagina_base	(uint virtual, uint cr3, uint fisica, uint attrs_pte, uint attrs_pde);
 uint mmu_unmapear_pagina(uint virtual, uint cr3);
 
 
