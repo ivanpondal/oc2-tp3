@@ -45,11 +45,11 @@ void mmu_copiar_pagina(uint src, uint dst){
 
 uint mmu_inicializar_dir_kernel(){
 
-	// Inicializo PDE
-	uint* ptr_pde = (uint*)(BASE_DIR_TABLAS);
-	*ptr_pde = 0;
-	*ptr_pde = *ptr_pde | 0x3; // Atributos
-	*ptr_pde = *ptr_pde | BASE_DIR_PAGINAS_0;
+	// Inicializo PD
+	uint* ptr_pd = (uint*)(BASE_DIR_TABLAS);
+	*ptr_pd = 0;
+	*ptr_pd = *ptr_pd | 0x3; // Atributos
+	*ptr_pd = *ptr_pd | BASE_DIR_PAGINAS_0;
 
 	uint direccion_pagina;
 	for(uint i = 0; i < 1024; i++){
@@ -121,9 +121,9 @@ void mmu_mapear_pagina_base(uint virtual, uint cr3, uint fisica, uint attrs_pte,
 
 	// Si no esta presente la tabla de páginas que buscamos
 	if ((pde & 0x1) == 0){
-		uint pt = mmu_proxima_pagina_fisica_libre();
-		mmu_inicializar_pagina((uint*)pt);
-		*ptr_pde = pt;	// Actualizamos el pde con la nueva dirección de la tabla de páginas
+		uint base_pagina_libre = mmu_proxima_pagina_fisica_libre();
+		mmu_inicializar_pagina((uint*)base_pagina_libre);
+		*ptr_pde = base_pagina_libre;	// Actualizamos el pde con la nueva dirección de la tabla de páginas
 	}
 
 	*ptr_pde = attrs_pde | *ptr_pde; // Seteamos el present y el write en el pde, para poder modificar el pte
