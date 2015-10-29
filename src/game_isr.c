@@ -117,6 +117,6 @@ void game_atender_teclado(unsigned char tecla)
 		default: break;
 	}
 
-	print(letra, 74, 0, 0x7);
+	print(letra, 73, 0, 0x7);
 
 }
