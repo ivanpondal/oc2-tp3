@@ -88,7 +88,7 @@ void game_atender_tick(perro_t *perro)
 
 void game_atender_teclado(unsigned char tecla)
 {
-	char* letra = "       ";
+	char* letra = "      ";
 	switch (tecla)
 	{
 		case KB_w: letra = "w"; break;
@@ -117,6 +117,6 @@ void game_atender_teclado(unsigned char tecla)
 		default: break;
 	}
 
-	print(letra, 73, 0, 0x7);
+	print(letra, 74, 0, 0x7);
 
 }
