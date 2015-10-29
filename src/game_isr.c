@@ -28,6 +28,7 @@ uint game_syscall_manejar(uint syscall, uint param1)
 // ~~~ recibe el perro que está corriendo actualmente
 void game_atender_tick(perro_t *perro)
 {
+	screen_actualizar_reloj_global();
 }
 
 
@@ -61,27 +62,61 @@ void game_atender_tick(perro_t *perro)
 
 
 // ~~~ debe atender la interrupción de teclado, se le pasa la tecla presionada
+// void game_atender_teclado(unsigned char tecla)
+// {
+// 	switch (tecla)
+// 	{
+// 		// ~~~ completar ~~~
+// 		case KB_q: game_jugador_lanzar_perro(&jugadorA, TIPO_1, 0, 0); break;
+
+// 		case KB_a: game_jugador_moverse(&jugadorA, -1,  0); break;
+
+
+// 		case KB_k: game_jugador_moverse(&jugadorB,  0, -1); break;
+
+// 		case KB_z: game_jugador_dar_orden(&jugadorA, 0); break;
+// 		case KB_x: game_jugador_dar_orden(&jugadorA, 1); break;
+// 		case KB_c: game_jugador_dar_orden(&jugadorA, 2); break;
+
+// 		case KB_b: game_jugador_dar_orden(&jugadorB, 0); break;
+// 		case KB_n: game_jugador_dar_orden(&jugadorB, 1); break;
+// 		case KB_m: game_jugador_dar_orden(&jugadorB, 2); break;
+// 		default: break;
+// 	}
+
+// }
+
 void game_atender_teclado(unsigned char tecla)
 {
+	char* letra = "       ";
 	switch (tecla)
 	{
-		// ~~~ completar ~~~
-		case KB_q: game_jugador_lanzar_perro(&jugadorA, TIPO_1, 0, 0); break;
+		case KB_w: letra = "w"; break;
+		case KB_s: letra = "s"; break;
+		case KB_a: letra = "a"; break;
+		case KB_d: letra = "d"; break;
+		
+		case KB_q: letra = "q"; break;
+		case KB_e: letra = "e"; break;
 
-		case KB_a: game_jugador_moverse(&jugadorA, -1,  0); break;
+		case KB_i: letra = "i"; break;
+		case KB_k: letra = "k"; break;
+		case KB_j: letra = "j"; break;
+		case KB_l: letra = "l"; break;
 
+		case KB_z: letra = "z"; break;
+		case KB_x: letra = "x"; break;
+		case KB_c: letra = "c"; break;
 
-		case KB_k: game_jugador_moverse(&jugadorB,  0, -1); break;
+		case KB_b: letra = "b"; break;
+		case KB_n: letra = "n"; break;
+		case KB_m: letra = "m"; break;
 
-		case KB_z: game_jugador_dar_orden(&jugadorA, 0); break;
-		case KB_x: game_jugador_dar_orden(&jugadorA, 1); break;
-		case KB_c: game_jugador_dar_orden(&jugadorA, 2); break;
-
-		case KB_b: game_jugador_dar_orden(&jugadorB, 0); break;
-		case KB_n: game_jugador_dar_orden(&jugadorB, 1); break;
-		case KB_m: game_jugador_dar_orden(&jugadorB, 2); break;
+		case KB_shiftL: letra = "shiftL"; break;
+		case KB_shiftR: letra = "shiftR"; break;
 		default: break;
 	}
 
-}
+	print(letra, 74, 0, 0x7);
 
+}

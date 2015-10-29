@@ -8,10 +8,16 @@ extern GDT_DESC
 extern IDT_DESC
 extern screen_pintar
 extern screen_inicializar
+
 extern idt_inicializar
+
 extern mmu_inicializar
 extern mmu_inicializar_dir_kernel
 extern mmu_unmapear_pagina
+
+extern resetear_pic
+extern habilitar_pic
+extern deshabilitar_pic
 
 global start
 
@@ -114,14 +120,21 @@ start:
     lidt [IDT_DESC]
 
     ; Configurar controlador de interrupciones
+    ;call deshabilitar_pic
+    call resetear_pic
+    call habilitar_pic
 
     ; Cargar tarea inicial
 
     ; Habilitar interrupciones
+    sti
 
     ; Saltar a la primera tarea: Idle
 
     ; Ciclar infinitamente (por si algo sale mal...)
+    ; Descomentar lo de abajo para generar una excepción al dividir por 0
+    ; xor esi, esi
+    ; div esi
     mov eax, 0xFFFF
     mov ebx, 0xFFFF
     mov ecx, 0xFFFF

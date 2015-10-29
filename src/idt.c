@@ -47,26 +47,29 @@ idt_descriptor IDT_DESC = {
 
 void idt_inicializar() {
     // Excepciones
-    IDT_ENTRY(0,0x00);
-    IDT_ENTRY(1,0x00);
-    IDT_ENTRY(2,0x00);
-    IDT_ENTRY(3,0x00);
-    IDT_ENTRY(4,0x00);
-    IDT_ENTRY(5,0x00);
-    IDT_ENTRY(6,0x00);
-    IDT_ENTRY(7,0x00);
-    IDT_ENTRY(8,0x00);
-    IDT_ENTRY(9,0x00);
-    IDT_ENTRY(10,0x00);
-    IDT_ENTRY(11,0x00);
-    IDT_ENTRY(12,0x00);
-    IDT_ENTRY(13,0x00);
-    IDT_ENTRY(14,0x00);
-    IDT_ENTRY(15,0x00);
-    IDT_ENTRY(16,0x00);
-    IDT_ENTRY(17,0x00);
-    IDT_ENTRY(18,0x00);
-    IDT_ENTRY(19,0x00);
+    IDT_ENTRY(0x00,0);
+    IDT_ENTRY(0x01,0);
+    IDT_ENTRY(0x02,0);
+    IDT_ENTRY(0x03,0);
+    IDT_ENTRY(0x04,0);
+    IDT_ENTRY(0x05,0);
+    IDT_ENTRY(0x06,0);
+    IDT_ENTRY(0x07,0);
+    IDT_ENTRY(0x08,0);
+    IDT_ENTRY(0x09,0);
+    IDT_ENTRY(0x0A,0);
+    IDT_ENTRY(0x0B,0);
+    IDT_ENTRY(0x0C,0);
+    IDT_ENTRY(0x0D,0);
+    IDT_ENTRY(0x0E,0);
+    IDT_ENTRY(0x0F,0);
+    IDT_ENTRY(0x10,0);
+    IDT_ENTRY(0x11,0);
+    IDT_ENTRY(0x12,0);
+    IDT_ENTRY(0x13,0);
+
+    IDT_ENTRY(0x20,0);
+    IDT_ENTRY(0x21,0);
 
 	// llamar a IDT_ENTRY una vez por cada entrada a configurar (es una macro que no soporta loops)
 }

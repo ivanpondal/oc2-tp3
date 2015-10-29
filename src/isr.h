@@ -8,26 +8,32 @@
 #ifndef __ISR_H__
 #define __ISR_H__
 
-void _isr0();
-void _isr1();
-void _isr2();
-void _isr3();
-void _isr4();
-void _isr5();
-void _isr6();
-void _isr7();
-void _isr8();
-void _isr9();
-void _isr10();
-void _isr11();
-void _isr12();
-void _isr13();
-void _isr14();
-void _isr15();
-void _isr16();
-void _isr17();
-void _isr18();
-void _isr19();
+void _isr0x00();
+void _isr0x01();
+void _isr0x02();
+void _isr0x03();
+void _isr0x04();
+void _isr0x05();
+void _isr0x06();
+void _isr0x07();
+void _isr0x08();
+void _isr0x09();
+void _isr0x0A();
+void _isr0x0B();
+void _isr0x0C();
+void _isr0x0D();
+void _isr0x0E();
+void _isr0x0F();
+void _isr0x10();
+void _isr0x11();
+void _isr0x12();
+void _isr0x13();
+
+//Handler del clock
+void _isr0x20();
+
+//Handler del teclado
+void _isr0x21();
 
 
 #endif  /* !__ISR_H__ */
