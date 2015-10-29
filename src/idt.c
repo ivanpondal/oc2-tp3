@@ -70,6 +70,7 @@ void idt_inicializar() {
 
     IDT_ENTRY(0x20,0);
     IDT_ENTRY(0x21,0);
+    IDT_ENTRY(0x46,0);
 
 	// llamar a IDT_ENTRY una vez por cada entrada a configurar (es una macro que no soporta loops)
 }

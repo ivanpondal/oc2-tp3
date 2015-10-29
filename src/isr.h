@@ -35,5 +35,8 @@ void _isr0x20();
 //Handler del teclado
 void _isr0x21();
 
+// Servicio del sistema
+void _isr0x46();
+
 
 #endif  /* !__ISR_H__ */

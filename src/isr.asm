@@ -71,8 +71,12 @@ ISR 0x13
 ;; -------------------------------------------------------------------------- ;;
 global _isr0x20
 _isr0x20:
+	pushad
+
 	call fin_intr_pic1
 	call game_atender_tick
+
+	popad
 	iret
 
 ;;
@@ -80,17 +84,22 @@ _isr0x20:
 ;; -------------------------------------------------------------------------- ;;
 global _isr0x21
 _isr0x21:
-	push eax
+	pushad
+
 	call fin_intr_pic1
 	xor eax, eax
 	in al, 0x60
 	push eax
 	call game_atender_teclado
 	pop eax
-	pop eax
+
+	popad
 	iret
 ;;
 ;; Rutinas de atención de las SYSCALLS
 ;; -------------------------------------------------------------------------- ;;
 
-
+global _isr0x46
+_isr0x46:
+	mov eax, 42
+	iret
