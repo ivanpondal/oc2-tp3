@@ -19,6 +19,9 @@ extern resetear_pic
 extern habilitar_pic
 extern deshabilitar_pic
 
+extern tss_inicializar
+extern tss_inicializar_idle
+
 global start
 
 
@@ -108,8 +111,10 @@ start:
     mov cr0, eax
 
     ; Inicializar tss
+	call tss_inicializar
 
     ; Inicializar tss de la tarea Idle
+	call tss_inicializar_idle
 
     ; Inicializar el scheduler
 
@@ -125,11 +130,14 @@ start:
     call habilitar_pic
 
     ; Cargar tarea inicial
+	mov ax, 0x68
+	ltr ax
 
     ; Habilitar interrupciones
     sti
 
     ; Saltar a la primera tarea: Idle
+	jmp 0x70:0
 
     ; Ciclar infinitamente (por si algo sale mal...)
     ; Descomentar lo de abajo para generar una excepción al dividir por 0

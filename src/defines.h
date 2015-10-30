@@ -47,5 +47,7 @@ typedef unsigned int   uint;
 #define GDT_ID10_KERNEL_DATA_DESC	10
 #define GDT_ID11_USER_DATA_DESC		11
 #define GDT_ID12_SCREEN_DESC		12
+#define GDT_ID13_TSS_INICIAL_DESC	13
+#define GDT_ID14_TSS_IDLE_DESC		14
 
 #endif  /* !__DEFINES_H__ */

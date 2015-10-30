@@ -56,5 +56,8 @@ typedef struct str_tss {
 } __attribute__((__packed__, aligned (8))) tss;
 
 void tss_inicializar();
+void tss_inicializar_idle();
+
+void tss_construir_tarea(perro_t *perro, int index_jugador, int index_tipo);
 
 #endif  /* !__TSS_H__ */

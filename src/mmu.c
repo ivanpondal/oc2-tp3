@@ -104,6 +104,12 @@ uint mmu_inicializar_memoria_perro(perro_t *perro, int index_jugador, int index_
 	uint direccion_codigo = (index_jugador == JUGADOR_A) ?
 		CODIGO_A_BASE + PAGE_SIZE*index_tipo : CODIGO_B_BASE + PAGE_SIZE*index_tipo;
 	mmu_copiar_pagina(direccion_codigo, base_dir_virtual_codigo);
+
+	uint* ptr_base_pila = (uint*)(base_dir_virtual_codigo + 0xFF4);
+	ptr_base_pila[0] = perro->y;
+	ptr_base_pila[1] = perro->x;
+	ptr_base_pila[2] = 0;
+
 	mmu_unmapear_pagina(base_dir_virtual_codigo, BASE_DIR_TABLAS);
 
 	return base_directorio_tablas_perro;
