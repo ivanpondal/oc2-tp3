@@ -5,8 +5,7 @@
 #include "screen.h"
 
 /// ************** RUTINAS DE ATENCION DE INTERRUPCIONES DE ************** ///
-///                              ALTO NIVEL                                ///
-///                  (deben ser llamadas desde isr.asm)                    ///
+///                              ALTO NIVEL                                /// ///                  (deben ser llamadas desde isr.asm)                    ///
 /// ********************************************************************** ///
 
 
@@ -21,7 +20,22 @@ void wait(int pseudosecs)
 uint game_syscall_manejar(uint syscall, uint param1)
 {
     // ~ completar llamando a las funciones que haga falta ~
-    return 0;
+	int ret = 0;
+	switch(syscall){
+		case 1:
+			ret = game_perro_mover(game_perro_actual, param1);
+			break;
+		case 2:
+			ret = game_perro_cavar(game_perro_actual);
+			break;
+		case 3:
+			ret = game_perro_olfatear(game_perro_actual);
+			break;
+		case 4:
+			ret = game_perro_recibir_orden(game_perro_actual);
+			break;
+	}
+    return ret;
 }
 
 // ~~~ debe atender la interrupción de reloj para actualizar la pantalla y terminar si es hora,

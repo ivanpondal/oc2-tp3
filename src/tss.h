@@ -60,4 +60,10 @@ void tss_inicializar_idle();
 
 void tss_construir_tarea(perro_t *perro, int index_jugador, int index_tipo);
 
+#define TSS_ENTRY(numero, jugador, perro) \
+	gdt[GDT_ID##numero##_TSS_JUG_##jugador##_PERRO_##perro].base_0_15 = (unsigned short)((uint)&tss_jugador##jugador##[##perro##] & 0xFFFF);
+/*
+	gdt[GDT_ID ## numero ## _TSS_JUG_ ## jugador ## _PERRO_ ## perro].base_23_16 = (unsigned char)(((uint)&tss_jugador ## jugador ## [ ##  perro ## ]>> 16) & 0xFF); \
+	gdt[GDT_ID ## numero ## _TSS_JUG_ ## jugador ## _PERRO_ ## perro].base_31_24 = (unsigned char)(((uint)&tss_jugador ## jugador ## [ ##  perro ## ]>> 24) & 0xFF);
+*/
 #endif  /* !__TSS_H__ */

@@ -21,8 +21,7 @@ extern sched_tarea_actual
 ;; Game 
 extern game_atender_tick
 extern game_atender_teclado
-
-
+extern game_syscall_manejar
 ;;
 ;; Definición de MACROS
 ;; -------------------------------------------------------------------------- ;;
@@ -101,5 +100,12 @@ _isr0x21:
 
 global _isr0x46
 _isr0x46:
-	mov eax, 42
+	pushad
+
+	push ecx
+	push eax
+	call game_syscall_manejar
+	add esp, 8
+
+	popad
 	iret

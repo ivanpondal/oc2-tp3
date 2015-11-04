@@ -31,7 +31,7 @@ typedef unsigned int   uint;
 
 /* Indices en la gdt */
 /* -------------------------------------------------------------------------- */
-#define GDT_COUNT 30
+#define GDT_COUNT 31
 
 #define GDT_IDX_NULL_DESC           0
 
@@ -49,5 +49,21 @@ typedef unsigned int   uint;
 #define GDT_ID12_SCREEN_DESC		12
 #define GDT_ID13_TSS_INICIAL_DESC	13
 #define GDT_ID14_TSS_IDLE_DESC		14
+#define GDT_ID15_TSS_JUG_A_PERRO_0	15
+#define GDT_ID16_TSS_JUG_A_PERRO_1	16
+#define GDT_ID17_TSS_JUG_A_PERRO_2	17
+#define GDT_ID18_TSS_JUG_A_PERRO_3	18
+#define GDT_ID19_TSS_JUG_A_PERRO_4	19
+#define GDT_ID20_TSS_JUG_A_PERRO_5	20
+#define GDT_ID21_TSS_JUG_A_PERRO_6	21
+#define GDT_ID22_TSS_JUG_A_PERRO_7	22
+#define GDT_ID23_TSS_JUG_B_PERRO_0	23
+#define GDT_ID24_TSS_JUG_B_PERRO_1	24
+#define GDT_ID25_TSS_JUG_B_PERRO_2	25
+#define GDT_ID26_TSS_JUG_B_PERRO_3	26
+#define GDT_ID27_TSS_JUG_B_PERRO_4	27
+#define GDT_ID28_TSS_JUG_B_PERRO_5	28
+#define GDT_ID29_TSS_JUG_B_PERRO_6	29
+#define GDT_ID30_TSS_JUG_B_PERRO_7	30
 
 #endif  /* !__DEFINES_H__ */

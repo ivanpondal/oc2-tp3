@@ -22,6 +22,7 @@ jugador_t jugadorB;
 
 perro_t *game_perro_actual = NULL;
 int ultimo_cambio = MAX_SIN_CAMBIOS;
+int ultima_orden[2] = {0, 0};
 
 void ASSERT_OR_ERROR(uint value, char* error_msg)
 {
@@ -44,7 +45,6 @@ uint game_xy2lineal (uint x, uint y) {
 uint game_es_posicion_valida(int x, int y) {
 	return (x >= 0 && y >= 0 && x < MAPA_ANCHO && y < MAPA_ALTO);
 }
-
 
 void game_inicializar()
 {
@@ -91,7 +91,9 @@ void game_terminar_si_es_hora()
 {
 }
 
-
+uint abs(int x){
+	return (x > 0) ? x : -x;
+}
 
 
 

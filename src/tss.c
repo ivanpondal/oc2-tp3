@@ -23,6 +23,8 @@ void tss_inicializar() {
 	gdt[GDT_ID14_TSS_IDLE_DESC].base_0_15 = (unsigned short)((uint)&tss_idle & 0xFFFF);
 	gdt[GDT_ID14_TSS_IDLE_DESC].base_23_16 = (unsigned char)(((uint)&tss_idle >> 16) & 0xFF);
 	gdt[GDT_ID14_TSS_IDLE_DESC].base_31_24 = (unsigned char)(((uint)&tss_idle >> 24) & 0xFF);
+
+	TSS_ENTRY(15, 'A', 0);
 }
 
 void tss_inicializar_idle() {
@@ -86,7 +88,7 @@ void tss_construir_tarea(perro_t *perro, int index_jugador, int index_tipo){
 	ptr_tss->ss2 = 0;
 	ptr_tss->unused3 = 0;
 	ptr_tss->cr3 = cr3;
-	ptr_tss->eip = direccion_codigo;
+	ptr_tss->eip = CODIGO_BASE;
 	ptr_tss->eflags = 0x00000202;
 	ptr_tss->eax = 0;
 	ptr_tss->ecx = 0;

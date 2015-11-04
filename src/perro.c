@@ -61,22 +61,56 @@ uint game_dir2xy(/* in */ direccion dir, /* out */ int *x, /* out */ int *y)
 // *** viene del syscall mover ***
 uint game_perro_mover(perro_t *perro, direccion dir)
 {
-	int x, y;
-	uint res = game_dir2xy(dir, &x, &y);
-	int nuevo_x = perro->x + x;
-	int nuevo_y = perro->y + y;
-    int viejo_x = perro->x;
-    int viejo_y = perro->y;
+	int x_dest = perro->x;
+	int y_dest = perro->y;
 
-    // ~~~ completar ~~~
-    return nuevo_x + nuevo_y + viejo_x + viejo_y + res; // uso todas las variables para que no tire warning->error.
+	switch(dir){
+		case ARR:
+			y_dest--;
+			break;
+		case ABA:
+			y_dest++;
+			break;
+		case DER:
+			x_dest++;
+			break;
+		case IZQ:
+			x_dest--;
+			break;
+		case AQUI:
+			break;
+	}
+
+	if(dir != AQUI && game_es_posicion_valida(x_dest, y_dest)){
+		perro_t* perro_en_posicion = game_perro_en_posicion(x_dest, y_dest);
+		if(perro_en_posicion != NULL && perro_en_posicion->jugador->index != perro->jugador->index){
+			// muevo al perro
+			perro->x = x_dest;
+			perro->y = y_dest;
+			uint direccion_nueva_virtual = mmu_xy2virtual(x_dest, y_dest);
+			uint direccion_nueva_fisica = mmu_xy2fisica(x_dest, y_dest);
+			uint cr3 = rcr3(); 
+			mmu_mapear_pagina_base(direccion_nueva_virtual, cr3, direccion_nueva_fisica, 0x5, 0x7);
+			mmu_copiar_pagina(CODIGO_BASE, direccion_nueva_virtual);
+			mmu_mapear_pagina_base(CODIGO_BASE, cr3, direccion_nueva_fisica, 0x7, 0x7);
+		}
+	}
+	return 0;
 }
 
 // recibe un perro, el cual debe cavar en su posición
 // *** viene del syscall cavar ***
 uint game_perro_cavar(perro_t *perro)
 {
-	// ~~~ completar ~~~
+	if(perro->huesos < 10 && game_huesos_en_posicion(perro->x, perro->y) > 0){
+		perro->huesos++;	
+		for (int i = 0; i < ESCONDITES_CANTIDAD; i++){
+			if (escondites[i][0] == perro->x && escondites[i][1] == perro->y){
+				escondites[i][2]--;
+				return 0;
+			}
+		}
+	}
 	return 0;
 }
 
@@ -117,6 +151,9 @@ uint game_perro_olfatear(perro_t *perro)
     return 0;
 }
 
+uint game_perro_recibir_orden(perro_t *perro){
+	return ultima_orden[perro->jugador->index];
+}
 
 // chequea si el perro está en la cucha y suma punto al jugador o lo manda a dormir
 void game_perro_ver_si_en_cucha(perro_t *perro)

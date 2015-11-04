@@ -51,6 +51,7 @@ typedef struct perro_t
 
 extern int escondites[ESCONDITES_CANTIDAD][3];
 extern int ultimo_cambio;
+extern int ultima_orden[2];
 extern perro_t *game_perro_actual;
 
 
@@ -112,6 +113,10 @@ uint game_perro_cavar(perro_t *perro);
 // *** viene del syscall olfatear ***
 uint game_perro_olfatear(perro_t *perro);
 
+// recibe un perro, devueve la última orden que se dio por su jugador
+// *** viene del syscall recibir orden ***
+uint game_perro_recibir_orden(perro_t *perro);
+
 // chequea si el perro está en la cucha y suma punto al jugador o lo manda a dormir
 void game_perro_ver_si_en_cucha(perro_t *perro);
 
@@ -155,5 +160,7 @@ perro_t* game_perro_en_posicion(uint x, uint y);
 
 // termina si se agotaron los huesos o si hace tiempo que no hay ningun cambio
 void game_terminar_si_es_hora();
+
+uint abs(int x);
 
 #endif  /* !__GAME_H__ */
