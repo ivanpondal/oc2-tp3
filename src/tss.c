@@ -24,7 +24,24 @@ void tss_inicializar() {
 	gdt[GDT_ID14_TSS_IDLE_DESC].base_23_16 = (unsigned char)(((uint)&tss_idle >> 16) & 0xFF);
 	gdt[GDT_ID14_TSS_IDLE_DESC].base_31_24 = (unsigned char)(((uint)&tss_idle >> 24) & 0xFF);
 
-	TSS_ENTRY(15, 'A', 0);
+	TSS_PERRO_ENTRY(15, A, 0);
+	TSS_PERRO_ENTRY(16, A, 1);
+	TSS_PERRO_ENTRY(17, A, 2);
+	TSS_PERRO_ENTRY(18, A, 3);
+	TSS_PERRO_ENTRY(19, A, 4);
+	TSS_PERRO_ENTRY(20, A, 5);
+	TSS_PERRO_ENTRY(21, A, 6);
+	TSS_PERRO_ENTRY(22, A, 7);
+
+	TSS_PERRO_ENTRY(23, B, 0);
+	TSS_PERRO_ENTRY(24, B, 1);
+	TSS_PERRO_ENTRY(25, B, 2);
+	TSS_PERRO_ENTRY(26, B, 3);
+	TSS_PERRO_ENTRY(27, B, 4);
+	TSS_PERRO_ENTRY(28, B, 5);
+	TSS_PERRO_ENTRY(29, B, 6);
+	TSS_PERRO_ENTRY(30, B, 7);
+
 }
 
 void tss_inicializar_idle() {
