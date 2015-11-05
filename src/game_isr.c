@@ -5,7 +5,8 @@
 #include "screen.h"
 
 /// ************** RUTINAS DE ATENCION DE INTERRUPCIONES DE ************** ///
-///                              ALTO NIVEL                                /// ///                  (deben ser llamadas desde isr.asm)                    ///
+///                              ALTO NIVEL                                ///
+///                  (deben ser llamadas desde isr.asm)                    ///
 /// ********************************************************************** ///
 
 
