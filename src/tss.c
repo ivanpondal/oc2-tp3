@@ -82,7 +82,7 @@ void tss_inicializar_idle() {
     tss_idle.ldt = 0;
     tss_idle.unused10 = 0;
     tss_idle.dtrap = 0;
-    tss_idle.iomap = 0;
+    tss_idle.iomap = 0xFFFF;
 }
 
 void tss_construir_tarea(perro_t *perro, int index_jugador, int index_tipo){
@@ -129,6 +129,6 @@ void tss_construir_tarea(perro_t *perro, int index_jugador, int index_tipo){
 	ptr_tss->ldt = 0;
 	ptr_tss->unused10 = 0;
 	ptr_tss->dtrap = 0;
-	ptr_tss->iomap = 0;
+	ptr_tss->iomap = 0xFFFF;
 }
 

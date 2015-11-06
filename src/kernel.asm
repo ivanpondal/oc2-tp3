@@ -21,6 +21,8 @@ extern resetear_pic
 extern habilitar_pic
 extern deshabilitar_pic
 
+extern sched_inicializar
+
 extern tss_inicializar
 extern tss_inicializar_idle
 
@@ -120,6 +122,7 @@ start:
 	call tss_inicializar_idle
 
     ; Inicializar el scheduler
+	call screen_inicializar
 
     ; Inicializar la IDT
     call idt_inicializar

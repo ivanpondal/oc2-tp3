@@ -19,7 +19,6 @@ extern sched_atender_tick
 extern sched_tarea_actual
 
 ;; Game 
-extern game_atender_tick
 extern game_atender_teclado
 extern game_syscall_manejar
 ;;
@@ -73,7 +72,7 @@ _isr0x20:
 	pushad
 
 	call fin_intr_pic1
-	call game_atender_tick
+	call sched_atender_tick
 
 	popad
 	iret
