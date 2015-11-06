@@ -21,6 +21,11 @@
 #define MAPA_ANCHO                       80
 #define MAPA_ALTO                        44
 
+#define POS_INIT_A_X                      1
+#define POS_INIT_A_Y                      1
+#define POS_INIT_B_X         MAPA_ANCHO - 2
+#define POS_INIT_B_Y          MAPA_ALTO - 2
+
 #define TIPO_1                            0
 #define TIPO_2                            1
 

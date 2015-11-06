@@ -3,13 +3,6 @@
 #include "mmu.h"
 #include "screen.h"
 
-
-#define POS_INIT_A_X                      1
-#define POS_INIT_A_Y                      1
-#define POS_INIT_B_X         MAPA_ANCHO - 2
-#define POS_INIT_B_Y          MAPA_ALTO - 2
-
-
 void game_jugador_inicializar(jugador_t *j)
 {
 	static int index = 0;
@@ -37,6 +30,7 @@ void game_jugador_inicializar(jugador_t *j)
 		game_perro_inicializar(&j->perros[i], j, i, gdt_index + i*8);
 	}
 
+	screen_pintar_jugador(j);
 }
 
 

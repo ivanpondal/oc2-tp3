@@ -97,7 +97,6 @@ start:
 	call game_inicializar
 
     ; Inicializar pantalla
-	call pintar_esquina_superior_izquierda
     call screen_inicializar
 
     ; Inicializar el manejador de memoria
@@ -122,7 +121,7 @@ start:
 	call tss_inicializar_idle
 
     ; Inicializar el scheduler
-	call screen_inicializar
+	call sched_inicializar
 
     ; Inicializar la IDT
     call idt_inicializar
@@ -142,13 +141,7 @@ start:
     ; Habilitar interrupciones
     sti
 
-    ; Saltar a la primera tarea: Idle
-	;jmp 0x70:0
-
     ; Ciclar infinitamente (por si algo sale mal...)
-    ; Descomentar lo de abajo para generar una excepción al dividir por 0
-    ; xor esi, esi
-    ; div esi
     mov eax, 0xFFFF
     mov ebx, 0xFFFF
     mov ecx, 0xFFFF

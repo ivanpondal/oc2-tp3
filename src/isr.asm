@@ -17,6 +17,7 @@ extern fin_intr_pic1
 ;; Sched
 extern sched_atender_tick
 extern sched_tarea_actual
+extern sched_remover_tarea
 
 ;; Game 
 extern game_atender_teclado
@@ -29,8 +30,11 @@ extern game_syscall_manejar
 global _isr%1
 
 _isr%1:
-    mov eax, %1
-    jmp $
+	str ax
+	push ax
+	call sched_remover_tarea
+	; Salto a la tarea idle
+	jmp 0x70:0
 
 %endmacro
 
@@ -74,6 +78,12 @@ _isr0x20:
 	call fin_intr_pic1
 	call sched_atender_tick
 
+	str cx
+	cmp ax, cx
+	je .fin
+		mov [sched_tarea_selector], ax
+		jmp far [sched_tarea_offset]
+	.fin:
 	popad
 	iret
 
@@ -105,6 +115,10 @@ _isr0x46:
 	push eax
 	call game_syscall_manejar
 	add esp, 8
+
+	; Salto a la tarea idle
+	xchg bx, bx
+	jmp 0x70:0
 
 	popad
 	iret

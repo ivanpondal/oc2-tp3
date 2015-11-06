@@ -86,7 +86,7 @@ void tss_inicializar_idle() {
 }
 
 void tss_construir_tarea(perro_t *perro, int index_jugador, int index_tipo){
-	uint cr3 = mmu_inicializar_memoria_perro(perro, index_jugador, index_jugador);
+	uint cr3 = mmu_inicializar_memoria_perro(perro, index_jugador, index_tipo);
 	uint ebp = CODIGO_BASE + 0xFFF;
 	uint esp = ebp - 12;
 

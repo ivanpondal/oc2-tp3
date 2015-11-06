@@ -44,6 +44,9 @@ uint game_syscall_manejar(uint syscall, uint param1)
 void game_atender_tick(perro_t *perro)
 {
 	screen_actualizar_reloj_global();
+	if(perro != NULL){
+		screen_actualizar_reloj_perro(perro);
+	}
 }
 
 
@@ -111,8 +114,8 @@ void game_atender_teclado(unsigned char tecla)
 		case KB_a: letra = "a"; break;
 		case KB_d: letra = "d"; break;
 		
-		case KB_q: letra = "q"; break;
-		case KB_e: letra = "e"; break;
+ 		case KB_q: game_jugador_lanzar_perro(&jugadorA, TIPO_1, POS_INIT_A_X, POS_INIT_A_Y); break;
+		case KB_e: game_jugador_lanzar_perro(&jugadorA, TIPO_2, POS_INIT_A_X, POS_INIT_A_Y); break;
 
 		case KB_i: letra = "i"; break;
 		case KB_k: letra = "k"; break;

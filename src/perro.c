@@ -34,13 +34,14 @@ void game_perro_reciclar_y_lanzar(perro_t *perro, uint tipo)
 	// lo scheduleen y finalmente lo pinten en pantalla
 
 	tss_construir_tarea(perro, j->index, tipo);
+	sched_agregar_tarea(perro);
 	screen_pintar_perro(perro);
 }
 
 // el perro descargó sus huesos o realizó una acción no válida y caputó, hay que sacarlo del sistema.
-void game_perro_termino(perro_t *perro)
-{
-//	~~~ completar ~~~
+void game_perro_termino(perro_t *perro){
+	screen_borrar_perro(perro);
+	perro->libre = TRUE;
 }
 
 // transforma código de dirección en valores x e y 
@@ -85,6 +86,7 @@ uint game_perro_mover(perro_t *perro, direccion dir)
 	if(dir != AQUI && game_es_posicion_valida(x_dest, y_dest)){
 		perro_t* perro_en_posicion = game_perro_en_posicion(x_dest, y_dest);
 		if(perro_en_posicion != NULL && perro_en_posicion->jugador->index != perro->jugador->index){
+			screen_borrar_perro(perro);
 			// muevo al perro
 			perro->x = x_dest;
 			perro->y = y_dest;
@@ -94,6 +96,8 @@ uint game_perro_mover(perro_t *perro, direccion dir)
 			mmu_mapear_pagina_base(direccion_nueva_virtual, cr3, direccion_nueva_fisica, 0x5, 0x7);
 			mmu_copiar_pagina(CODIGO_BASE, direccion_nueva_virtual);
 			mmu_mapear_pagina_base(CODIGO_BASE, cr3, direccion_nueva_fisica, 0x7, 0x7);
+
+			screen_pintar_perro(perro);
 		}
 	}
 	return 0;
