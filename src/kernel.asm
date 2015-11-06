@@ -9,6 +9,8 @@ extern IDT_DESC
 extern screen_pintar
 extern screen_inicializar
 
+extern game_inicializar
+
 extern idt_inicializar
 
 extern mmu_inicializar
@@ -90,6 +92,7 @@ start:
     imprimir_texto_mp iniciando_mp_msg, iniciando_mp_len, 0x07, 2, 0
 
     ; Inicializar el juego
+	call game_inicializar
 
     ; Inicializar pantalla
 	call pintar_esquina_superior_izquierda
@@ -137,7 +140,7 @@ start:
     sti
 
     ; Saltar a la primera tarea: Idle
-	jmp 0x70:0
+	;jmp 0x70:0
 
     ; Ciclar infinitamente (por si algo sale mal...)
     ; Descomentar lo de abajo para generar una excepción al dividir por 0

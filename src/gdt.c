@@ -117,7 +117,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x00,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -133,7 +133,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x00,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -149,7 +149,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -165,7 +165,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -181,7 +181,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -197,7 +197,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -213,7 +213,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -229,7 +229,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -245,7 +245,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -261,7 +261,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -277,7 +277,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -293,7 +293,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -309,7 +309,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -325,7 +325,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -341,7 +341,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -357,7 +357,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -373,7 +373,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -389,7 +389,7 @@ gdt_entry gdt[GDT_COUNT] = {
         (unsigned short)    0x0000,         /* base[0:15]   */
         (unsigned char)     0x00,           /* base[23:16]  */
         (unsigned char)     0x09,           /* type         */
-        (unsigned char)     0x01,           /* s            */
+        (unsigned char)     0x00,           /* s            */
         (unsigned char)     0x03,           /* dpl          */
         (unsigned char)     0x01,           /* p            */
         (unsigned char)     0x00,           /* limit[16:19] */
@@ -405,5 +405,5 @@ gdt_entry gdt[GDT_COUNT] = {
 
 gdt_descriptor GDT_DESC = {
     sizeof(gdt) - 1,
-    (unsigned int) &gdt
+    (unsigned int) &gdt,
 };

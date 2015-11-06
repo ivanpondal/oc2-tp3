@@ -25,6 +25,7 @@ void game_perro_reciclar_y_lanzar(perro_t *perro, uint tipo)
 
 	perro->x = j->x_cucha;
 	perro->y = j->y_cucha;
+	perro->huesos = 0;
 	perro->tipo = tipo;
 	perro->libre = FALSE;
 
@@ -32,8 +33,8 @@ void game_perro_reciclar_y_lanzar(perro_t *perro, uint tipo)
 	// memoria para el nuevo perro, que carguen su tss correspondiente,
 	// lo scheduleen y finalmente lo pinten en pantalla
 
-	// ~~~ completar ~~~
-
+	tss_construir_tarea(perro, j->index, tipo);
+	screen_pintar_perro(perro);
 }
 
 // el perro descargó sus huesos o realizó una acción no válida y caputó, hay que sacarlo del sistema.

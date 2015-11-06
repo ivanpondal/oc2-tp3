@@ -87,11 +87,10 @@ void tss_inicializar_idle() {
 
 void tss_construir_tarea(perro_t *perro, int index_jugador, int index_tipo){
 	uint cr3 = mmu_inicializar_memoria_perro(perro, index_jugador, index_jugador);
-	uint direccion_codigo = (index_jugador == JUGADOR_A) ? CODIGO_A_BASE + PAGE_SIZE*index_tipo : CODIGO_B_BASE + PAGE_SIZE*index_tipo;
-	uint ebp = direccion_codigo + 0xFFF;
+	uint ebp = CODIGO_BASE + 0xFFF;
 	uint esp = ebp - 12;
 
-	tss* ptr_tss = (index_jugador == JUGADOR_A) ? &tss_jugadorA[perro->id] : &tss_jugadorB[perro->id];
+	tss* ptr_tss = (index_jugador == JUGADOR_A) ? &tss_jugadorA[perro->index] : &tss_jugadorB[perro->index];
 
 	ptr_tss->ptl = 0;
 	ptr_tss->unused0 = 0;
@@ -115,17 +114,17 @@ void tss_construir_tarea(perro_t *perro, int index_jugador, int index_tipo){
 	ptr_tss->ebp = ebp;
 	ptr_tss->esi = 0;
 	ptr_tss->edi = 0;
-	ptr_tss->es = 0x58;
+	ptr_tss->es = 0x5B;
 	ptr_tss->unused4 = 0;
-	ptr_tss->cs = 0x48;
+	ptr_tss->cs = 0x4B;
 	ptr_tss->unused5 = 0;
-	ptr_tss->ss = 0x58;
+	ptr_tss->ss = 0x5B;
 	ptr_tss->unused6 = 0;
-	ptr_tss->ds = 0x58;
+	ptr_tss->ds = 0x5B;
 	ptr_tss->unused7 = 0;
-	ptr_tss->fs = 0x58;
+	ptr_tss->fs = 0x5B;
 	ptr_tss->unused8 = 0;
-	ptr_tss->gs = 0x58;
+	ptr_tss->gs = 0x5B;
 	ptr_tss->unused9 = 0;
 	ptr_tss->ldt = 0;
 	ptr_tss->unused10 = 0;

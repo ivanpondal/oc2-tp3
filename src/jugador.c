@@ -30,10 +30,10 @@ void game_jugador_inicializar(jugador_t *j)
 	j->y_cucha = j->y;
 
 
+	uint gdt_index = j->index == JUGADOR_A ? 0x7B : 0xBB;
 	int i;
 	for (i = 0; i < MAX_CANT_PERROS_VIVOS; i++)
 	{
-		uint gdt_index = 0; // CAMBIAR POR ALGO VALIDO
 		game_perro_inicializar(&j->perros[i], j, i, gdt_index + i*8);
 	}
 
