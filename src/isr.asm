@@ -117,7 +117,6 @@ _isr0x46:
 	add esp, 8
 
 	; Salto a la tarea idle
-	xchg bx, bx
 	jmp 0x70:0
 
 	popad

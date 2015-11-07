@@ -92,9 +92,11 @@ void tss_construir_tarea(perro_t *perro, int index_jugador, int index_tipo){
 
 	tss* ptr_tss = (index_jugador == JUGADOR_A) ? &tss_jugadorA[perro->index] : &tss_jugadorB[perro->index];
 
+	uint pila_nivel_0 = mmu_proxima_pagina_fisica_libre() + 0xFFF;
+
 	ptr_tss->ptl = 0;
 	ptr_tss->unused0 = 0;
-	ptr_tss->esp0 = 0x27000;
+	ptr_tss->esp0 = pila_nivel_0;
 	ptr_tss->ss0 = 0x50;
 	ptr_tss->unused1 = 0;
 	ptr_tss->esp1 = 0;
