@@ -83,9 +83,10 @@ uint game_perro_mover(perro_t *perro, direccion dir)
 			break;
 	}
 
+
 	if(dir != AQUI && game_es_posicion_valida(x_dest, y_dest)){
 		perro_t* perro_en_posicion = game_perro_en_posicion(x_dest, y_dest);
-		if(perro_en_posicion != NULL && perro_en_posicion->jugador->index != perro->jugador->index){
+		if(perro_en_posicion == NULL || perro_en_posicion->jugador->index != perro->jugador->index){
 			screen_borrar_perro(perro);
 			// muevo al perro
 			perro->x = x_dest;
@@ -112,7 +113,7 @@ uint game_perro_cavar(perro_t *perro)
 		for (int i = 0; i < ESCONDITES_CANTIDAD; i++){
 			if (escondites[i][0] == perro->x && escondites[i][1] == perro->y){
 				escondites[i][2]--;
-				return 0;
+				return escondites[i][2];
 			}
 		}
 	}
@@ -143,6 +144,7 @@ uint game_perro_olfatear(perro_t *perro)
 
 	if (x_actual_diff == 0 && y_actual_diff == 0)
 		return AQUI;
+
 
 	if (x_actual_diff * x_actual_diff > y_actual_diff * y_actual_diff)
 	{

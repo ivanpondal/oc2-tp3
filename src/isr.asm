@@ -109,15 +109,22 @@ _isr0x21:
 
 global _isr0x46
 _isr0x46:
+	push ebp
+	mov ebp, esp
 	pushad
 
 	push ecx
 	push eax
 	call game_syscall_manejar
 	add esp, 8
+	push eax
+	add esp, 4
 
 	; Salto a la tarea idle
 	jmp 0x70:0
 
 	popad
+	sub ebp, 36
+	mov eax, [ebp]
+	pop ebp
 	iret
