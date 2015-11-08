@@ -38,38 +38,38 @@ typedef struct perro_t
 {
 
 	// ~~~ para ser completado ~~~
-    uint index;  // indice de 0 a 15
-    struct jugador_t *jugador;
+  uint index;  // indice de 0 a 15
+  struct jugador_t *jugador;
 
 	uint id;     // id unica tarea
 	uint tipo;   // raza del perro
-    uint libre;  // libre: -true- slot disponible para lanzar perro  / -false- ya hay un perro vivo
+  uint libre;  // libre: -true- slot disponible para lanzar perro  / -false- ya hay un perro vivo
 
-    uint x;
-    uint y;
+  uint x;
+  uint y;
 
 	uint huesos;
-    uint indice_reloj;
+  uint indice_reloj;
 
 } perro_t;
 
 
 extern int escondites[ESCONDITES_CANTIDAD][3];
 extern int ultimo_cambio;
-extern int ultima_orden[2];
+extern int ultima_orden[2][3]; //Cada arreglo es de la forma [x,y,orden]
 extern perro_t *game_perro_actual;
 
 
 typedef struct jugador_t
 {
-    uint index;    // 0 o 1
-    perro_t perros[MAX_CANT_PERROS_VIVOS];   // los perros del jugador
-    uint x_cucha, y_cucha;
+  uint index;    // 0 o 1
+  perro_t perros[MAX_CANT_PERROS_VIVOS];   // los perros del jugador
+  uint x_cucha, y_cucha;
 
-    // posicion, puntos, ordenes, etc.
+  // posicion, puntos, ordenes, etc.
 	// completar si es necesario.
 	int x, y;  // posicion
-    uint puntos;
+  uint puntos;
 
 } jugador_t;
 

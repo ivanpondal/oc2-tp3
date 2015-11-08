@@ -21,8 +21,8 @@ jugador_t jugadorA;
 jugador_t jugadorB;
 
 perro_t *game_perro_actual = NULL;
-int ultimo_cambio = MAX_SIN_CAMBIOS;
-int ultima_orden[2] = {0, 0};
+int ultimo_cambio = 0;
+int ultima_orden[2][3] = {{0,0,42},{0,0,42}};
 
 void ASSERT_OR_ERROR(uint value, char* error_msg)
 {
@@ -87,6 +87,15 @@ perro_t* game_perro_en_posicion(uint x, uint y)
 
 
 // termina si se agotaron los huesos o si hace tiempo que no hay ningun cambio
-void game_terminar_si_es_hora()
-{
+void game_terminar_si_es_hora(){
+	int suma = 0;
+	for (int i = 0; i < ESCONDITES_CANTIDAD; i++){
+		suma += escondites[i][2];
+	}
+
+	jugador_t* ganador = NULL;
+	if(jugadorA.puntos > jugadorB.puntos) ganador = &jugadorA;
+	else if(jugadorA.puntos < jugadorB.puntos) ganador = &jugadorB;
+
+	if(suma == 0 || ultimo_cambio == MAX_SIN_CAMBIOS) screen_stop_game_show_winner(ganador);
 }

@@ -68,14 +68,18 @@ uint game_jugador_moverse(jugador_t *j, int x, int y)
 	int nuevo_x = j->x + x;
 	int nuevo_y = j->y + y;
 
-    // ~~~ completar ~~~
+	screen_borrar_jugador(j);
+	j->x = nuevo_x;
+	j->y = nuevo_y;
+
+    screen_pintar_jugador(j);
     return nuevo_x + nuevo_y; // uso todas las variables locales para que no tire warning -> error
 }
 
 // descarga 1 hueso en la cucha y actualiza el screen
 void game_jugador_anotar_punto(jugador_t *j)
 {
-    ultimo_cambio = MAX_SIN_CAMBIOS;
+    ultimo_cambio = 0;
 
 	j->puntos++;
 
@@ -87,9 +91,16 @@ void game_jugador_anotar_punto(jugador_t *j)
 
 
 // guarda la orden en el jugador para que los perros puedan preguntarla luego (mediante un syscall)
-void game_jugador_dar_orden(jugador_t *jugador, int orden)
-{
-	
+void game_jugador_dar_orden(jugador_t *jugador, int orden){
+	if(jugador->index == 0){
+		ultima_orden[0][0] = jugador->x;
+		ultima_orden[0][1] = jugador->y;
+		ultima_orden[0][2] = orden;
+	}else{
+		ultima_orden[1][0] = jugador->x;
+		ultima_orden[1][1] = jugador->y;
+		ultima_orden[1][2] = orden;
+	}
 }
 
 
