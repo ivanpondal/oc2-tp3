@@ -45,8 +45,8 @@ void game_atender_tick(perro_t *perro)
 {
 	screen_actualizar_reloj_global();
 	if(perro != NULL){
-		screen_actualizar_reloj_perro(perro);
 		game_perro_ver_si_en_cucha(perro);
+		screen_actualizar_reloj_perro(perro);
 	}
 	ultimo_cambio++;
 	game_terminar_si_es_hora();
