@@ -22,7 +22,7 @@ jugador_t jugadorB;
 
 perro_t *game_perro_actual = NULL;
 int ultimo_cambio = 0;
-int ultima_orden[2][3] = {{0,0,42},{0,0,42}};
+int ultima_orden[2][3] = {{0, 0, 0}, {0, 0, 0}};
 
 void ASSERT_OR_ERROR(uint value, char* error_msg)
 {

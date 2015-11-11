@@ -158,11 +158,11 @@ uint game_perro_olfatear(perro_t *perro)
     return 0;
 }
 
-uint game_perro_recibir_orden(perro_t *perro){
-	uint index = perro->jugador->index;
-	int x = ultima_orden[index][0];
-	int y = ultima_orden[index][1];
-	int orden = ultima_orden[index][2];
+uint game_perro_recibir_orden(perro_t *perro, uint jugador_index){
+	if(jugador_index > 1) return 0;
+	int x = ultima_orden[jugador_index][0];
+	int y = ultima_orden[jugador_index][1];
+	int orden = ultima_orden[jugador_index][2];
 	uint orden_codificada = ( orden << 16) | (y << 8) | x;
 	return orden_codificada;
 }

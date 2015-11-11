@@ -33,7 +33,7 @@ uint game_syscall_manejar(uint syscall, uint param1)
 			ret = game_perro_olfatear(game_perro_actual);
 			break;
 		case 4:
-			ret = game_perro_recibir_orden(game_perro_actual);
+			ret = game_perro_recibir_orden(game_perro_actual, param1);
 			break;
 	}
     return ret;
@@ -96,9 +96,9 @@ void game_atender_teclado(unsigned char tecla)
  		case KB_q: game_jugador_lanzar_perro(&jugadorA, TIPO_1, POS_INIT_A_X, POS_INIT_A_Y); break;
 		case KB_e: game_jugador_lanzar_perro(&jugadorA, TIPO_2, POS_INIT_A_X, POS_INIT_A_Y); break;
 
-		case KB_z: game_jugador_dar_orden(&jugadorA, 0); break;
-		case KB_x: game_jugador_dar_orden(&jugadorA, 1); break;
-		case KB_c: game_jugador_dar_orden(&jugadorA, 2); break;
+		case KB_z: game_jugador_dar_orden(&jugadorA, 1); break;
+		case KB_x: game_jugador_dar_orden(&jugadorA, 2); break;
+		case KB_c: game_jugador_dar_orden(&jugadorA, 3); break;
 
 		case KB_i: game_jugador_moverse(&jugadorB,  0, -1); break;
 		case KB_k: game_jugador_moverse(&jugadorB,  0, 1); break;
@@ -108,9 +108,9 @@ void game_atender_teclado(unsigned char tecla)
  		case KB_u: game_jugador_lanzar_perro(&jugadorB, TIPO_1, POS_INIT_B_X, POS_INIT_B_Y); break;
 		case KB_o: game_jugador_lanzar_perro(&jugadorB, TIPO_2, POS_INIT_B_X, POS_INIT_B_Y); break;
 
-		case KB_b: game_jugador_dar_orden(&jugadorB, 0); break;
-		case KB_n: game_jugador_dar_orden(&jugadorB, 1); break;
-		case KB_m: game_jugador_dar_orden(&jugadorB, 2); break;
+		case KB_b: game_jugador_dar_orden(&jugadorB, 1); break;
+		case KB_n: game_jugador_dar_orden(&jugadorB, 2); break;
+		case KB_m: game_jugador_dar_orden(&jugadorB, 3); break;
 
 		case KB_shiftL: letra = "shiftL"; break;
 		case KB_shiftR: letra = "shiftR"; break;

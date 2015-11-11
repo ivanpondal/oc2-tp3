@@ -97,22 +97,37 @@ void task(int x_origen, int y_origen) {
  
 	int x_actual = x_origen;
 	int y_actual = y_origen;
+	int codigo_orden;
+	int orden;
+	int x_orden;
+	int y_orden;
 
 	while (TRUE)
 	{
-		int direccion = syscall_olfatear();
-		if (direccion == AQUI)
-			break;
-		
-		actualizar(&x_actual, &y_actual, direccion);
-		syscall_moverse(direccion);
+		codigo_orden = syscall_recibir_ordenes(JUGADOR_A);
+		orden = codigo_orden >> 16;
+		x_orden = codigo_orden & 0x000000FF;
+		y_orden = (codigo_orden >> 8) & 0x000000FF;
+
+		switch(orden){
+			case 1: // cavar
+				while (syscall_cavar() != 0){}
+				ir_hacia_desde(x_origen, y_origen, x_actual, y_actual);
+				break;
+			case 2: // venir a donde estoy parado
+				ir_hacia_desde(x_orden, y_orden, x_actual, y_actual);
+				x_actual = x_orden;
+				y_actual = y_orden;
+				break;
+			case 3: // ir a cucha
+				ir_hacia_desde(x_origen, y_origen, x_actual, y_actual);
+				while(1) { __asm __volatile("mov $2, %%eax":::"eax"); }
+				break;
+			default:
+				break;
+		}
 	}
-	while (syscall_cavar() != 0)
-	{}
 	
-
-	ir_hacia_desde(x_origen, y_origen, x_actual, y_actual);
-
     while(1) { __asm __volatile("mov $2, %%eax":::"eax"); }
 }
 
