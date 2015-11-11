@@ -100,7 +100,8 @@ uint mmu_inicializar_memoria_perro(perro_t *perro, int index_jugador, int index_
 	mmu_mapear_pagina_base(COMPARTIDA_BASE, base_directorio_tablas_perro, direccion_compartida, 0x7, 0x7);
 
 	// Mapeamos en kernel y copiamos código
-	mmu_mapear_pagina(base_dir_virtual_codigo, BASE_DIR_TABLAS, base_dir_fisica_codigo, 0x3);
+	uint cr3 = rcr3();
+	mmu_mapear_pagina(base_dir_virtual_codigo, cr3, base_dir_fisica_codigo, 0x3);
 	uint direccion_codigo = (index_jugador == JUGADOR_A) ?
 		CODIGO_A_BASE + PAGE_SIZE*index_tipo : CODIGO_B_BASE + PAGE_SIZE*index_tipo;
 	mmu_copiar_pagina(direccion_codigo, base_dir_virtual_codigo);
@@ -110,7 +111,7 @@ uint mmu_inicializar_memoria_perro(perro_t *perro, int index_jugador, int index_
 	ptr_base_pila[1] = perro->x;
 	ptr_base_pila[2] = 0;
 
-	mmu_unmapear_pagina(base_dir_virtual_codigo, BASE_DIR_TABLAS);
+	mmu_unmapear_pagina(base_dir_virtual_codigo, cr3);
 
 	return base_directorio_tablas_perro;
 }
