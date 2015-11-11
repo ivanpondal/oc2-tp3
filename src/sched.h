@@ -34,6 +34,7 @@ typedef struct sched_t
 } sched_t;
 
 extern sched_t scheduler;
+extern int debug_screen_on;
 
 /*
 ================================================================================
@@ -55,5 +56,8 @@ perro_t* sched_tarea_actual();
 // debe avisar al juego que hubo un tick (para que haga cosas del juego) y luego configurarse
 // para pasar a la siguiente tarea (devuelve su indice en la gdt)
 ushort sched_atender_tick();
+
+//Activa la pantalla del modo debug hasta que se presiona la "y"
+void sched_debug_interrupcion();
 
 #endif	/* !__SCHED_H__ */

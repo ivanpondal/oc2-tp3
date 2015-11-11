@@ -110,7 +110,8 @@ uint game_perro_cavar(perro_t *perro)
 {
 	if(perro->huesos < 10 && game_huesos_en_posicion(perro->x, perro->y) > 0){
 		perro->huesos++;	
-		for (int i = 0; i < ESCONDITES_CANTIDAD; i++){
+		int i;		
+		for (i = 0; i < ESCONDITES_CANTIDAD; i++){
 			if (escondites[i][0] == perro->x && escondites[i][1] == perro->y){
 				escondites[i][2]--;
 				return escondites[i][2];

@@ -8,9 +8,12 @@ TRABAJO PRACTICO 3 - System Programming - ORGANIZACION DE COMPUTADOR II - FCEN
 #include "mmu.h"
 #include "tss.h"
 #include "screen.h"
+#include "sched.h"
 
 #include <stdarg.h>
 
+
+int debug_on = FALSE;
 
 int escondites[ESCONDITES_CANTIDAD][3] = { // TRIPLAS DE LA FORMA (X, Y, HUESOS)
                                         {76,  25, 50}, {12, 15, 50}, {9, 10, 100}, {47, 21, 100} ,
@@ -50,6 +53,8 @@ void game_inicializar()
 {
 	game_jugador_inicializar(&jugadorA);
 	game_jugador_inicializar(&jugadorB);
+	debug_screen_on = 0;
+	debug_on = 0;
 
     screen_pintar_puntajes();
 }
@@ -89,7 +94,8 @@ perro_t* game_perro_en_posicion(uint x, uint y)
 // termina si se agotaron los huesos o si hace tiempo que no hay ningun cambio
 void game_terminar_si_es_hora(){
 	int suma = 0;
-	for (int i = 0; i < ESCONDITES_CANTIDAD; i++){
+	int i;	
+	for (i = 0; i < ESCONDITES_CANTIDAD; i++){
 		suma += escondites[i][2];
 	}
 
@@ -98,4 +104,15 @@ void game_terminar_si_es_hora(){
 	else if(jugadorA.puntos < jugadorB.puntos) ganador = &jugadorB;
 
 	if(suma == 0 || ultimo_cambio == MAX_SIN_CAMBIOS) screen_stop_game_show_winner(ganador);
+}
+
+void game_jugador_debug(){
+		if(debug_on == 0){
+			debug_on = 1;
+			print("MODO DEBUG ACTIVADO",55,0,0x0f0f);
+		}
+		else{ 
+			debug_on = 0;
+			screen_pintar_rect(0, 0x00, 0, 53, 1, 23);
+		}
 }

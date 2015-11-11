@@ -29,7 +29,8 @@ uint mmu_proxima_pagina_fisica_libre(){
 }
 
 void mmu_inicializar_pagina(uint * pagina){
-	for(uint i = 0; i < 1024; i++){
+	uint i;	
+	for(i = 0; i < 1024; i++){
 		pagina[i] = 0;
 	}
 }
@@ -37,8 +38,8 @@ void mmu_inicializar_pagina(uint * pagina){
 void mmu_copiar_pagina(uint src, uint dst){
 	uint* ptr_src = (uint*)(src);
 	uint* ptr_dst = (uint*)(dst);
-
-	for(uint i = 0; i < 1024; i++){
+	uint i;
+	for(i = 0; i < 1024; i++){
 		ptr_dst[i] = ptr_src[i];
 	}
 }
@@ -52,7 +53,8 @@ uint mmu_inicializar_dir_kernel(){
 	*ptr_pd = *ptr_pd | BASE_DIR_PAGINAS_0;
 
 	uint direccion_pagina;
-	for(uint i = 0; i < 1024; i++){
+	uint i;	
+	for(i = 0; i < 1024; i++){
 		direccion_pagina = i << 12;
 		mmu_mapear_pagina(direccion_pagina, BASE_DIR_TABLAS, direccion_pagina, 0x3);
 	}
@@ -84,7 +86,8 @@ uint mmu_inicializar_memoria_perro(perro_t *perro, int index_jugador, int index_
 
 	// Identity mapping
 	uint direccion_pagina;
-	for(uint i = 0; i < 1024; i++){
+	uint i;	
+	for(i = 0; i < 1024; i++){
 		direccion_pagina = i << 12;
 		mmu_mapear_pagina(direccion_pagina, base_directorio_tablas_perro, direccion_pagina, 0x3);
 	}

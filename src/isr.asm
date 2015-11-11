@@ -11,6 +11,11 @@ BITS 32
 sched_tarea_offset:     dd 0x00
 sched_tarea_selector:   dw 0x00
 
+;; Debugger
+extern debug_info
+extern debug_screen_on
+extern debug_on
+
 ;; PIC
 extern fin_intr_pic1
 
@@ -18,10 +23,16 @@ extern fin_intr_pic1
 extern sched_atender_tick
 extern sched_tarea_actual
 extern sched_remover_tarea
+extern sched_debug_interrupcion
+
 
 ;; Game 
 extern game_atender_teclado
 extern game_syscall_manejar
+
+;; Clock
+extern esta_pantalla_debug_activada
+
 ;;
 ;; Definición de MACROS
 ;; -------------------------------------------------------------------------- ;;
@@ -30,11 +41,74 @@ extern game_syscall_manejar
 global _isr%1
 
 _isr%1:
-	str ax
-	push ax
+	str ax	;COMENTAR ESTAS LINEAS SI SE QUIERE  
+	push ax	;SACAR EL PANIC DE LAS EXCEPCIONES
+
+
+    	mov dword [debug_info + 00], eax
+    	mov dword [debug_info + 04], ebx
+    	mov dword [debug_info + 08], ecx
+    	mov dword [debug_info + 12], edx
+    	mov dword [debug_info + 16], esi
+    	mov dword [debug_info + 20], edi
+    	mov dword [debug_info + 24], ebp
+   	mov dword [debug_info + 28], esp
+ 
+	mov eax, [esp+12] ; eip
+	mov dword [debug_info + 32], eax ;eip
+		
+	mov ax, cs
+	mov word [debug_info + 36], ax
+	mov ax, ds
+	mov word [debug_info + 38], ax
+	mov ax, es
+	mov word [debug_info + 40], ax
+	mov ax, fs
+	mov word [debug_info + 42], ax
+	mov ax, gs
+	mov word [debug_info + 44], ax
+	mov ax, ss
+	mov word [debug_info + 46], ax
+    
+    	xor eax, eax
+    	pushf    ; obtenemos el registro
+    	pop ax   ; eflags
+    	mov dword [debug_info + 48], eax ; guardo flags
+    
+   	mov eax, cr0
+  	mov dword [debug_info + 52], eax
+  	mov eax, cr2
+  	mov dword [debug_info + 56], eax
+  	mov eax, cr3
+  	mov dword [debug_info + 60], eax
+  	mov eax, cr4
+  	mov dword [debug_info + 64], eax
+  	
+  	mov eax, [esp]
+  	mov dword [debug_info + 68], eax
+  	mov eax, [esp+4]
+  	mov dword [debug_info + 72], eax
+  	mov eax, [esp+8]
+  	mov dword [debug_info + 76], eax
+  	mov eax, [esp+12]
+  	mov dword [debug_info + 80], eax
+    	mov eax, [esp+16]
+  	mov dword [debug_info + 84], eax
+
+	sti
+
 	call sched_remover_tarea
-	; Salto a la tarea idle
+	xor eax,eax
+	mov eax,1
+	cmp [debug_on],eax
+	jne .nodebuguear
+	call sched_debug_interrupcion
+	.nodebuguear:
+	;Salto a la tarea idle
 	jmp 0x70:0
+
+
+
 
 %endmacro
 
@@ -76,6 +150,14 @@ _isr0x20:
 	pushad
 
 	call fin_intr_pic1
+	
+
+	xor eax,eax
+	mov eax,1
+	cmp [debug_screen_on],eax
+	je .fin
+	xor eax, eax	
+	
 	call sched_atender_tick
 
 	str cx
@@ -124,3 +206,4 @@ _isr0x46:
 	popad
 	pop eax
 	iret
+

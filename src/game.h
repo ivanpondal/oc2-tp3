@@ -53,6 +53,7 @@ typedef struct perro_t
 
 } perro_t;
 
+extern int debug_on;
 
 extern int escondites[ESCONDITES_CANTIDAD][3];
 extern int ultimo_cambio;
@@ -165,5 +166,7 @@ perro_t* game_perro_en_posicion(uint x, uint y);
 
 // termina si se agotaron los huesos o si hace tiempo que no hay ningun cambio
 void game_terminar_si_es_hora();
+
+void game_jugador_debug();
 
 #endif  /* !__GAME_H__ */

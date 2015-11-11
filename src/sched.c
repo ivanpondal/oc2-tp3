@@ -9,10 +9,13 @@ definicion de funciones del scheduler
 #include "i386.h"
 #include "screen.h"
 
+int debug_screen_on = FALSE;
+
 sched_t scheduler;
 
 void sched_inicializar(){
-	for(int i = 0; i < MAX_CANT_TAREAS_VIVAS ; i++){
+	int i;	
+	for(i = 0; i < MAX_CANT_TAREAS_VIVAS ; i++){
 		scheduler.tasks[i].gdt_index = 0;
 		scheduler.tasks[i].perro = 0;
 	}
@@ -25,8 +28,8 @@ void sched_inicializar(){
 
 int sched_buscar_indice_tarea(uint gdt_index) {
 	int indice_tarea = -1;
-
-	for(int i = 0; i < MAX_CANT_TAREAS_VIVAS; i++){
+	int i;
+	for(i = 0; i < MAX_CANT_TAREAS_VIVAS; i++){
 		if(scheduler.tasks[i].gdt_index == gdt_index){
 			return i;
 		}
@@ -36,7 +39,8 @@ int sched_buscar_indice_tarea(uint gdt_index) {
 
 
 int sched_buscar_tarea_libre(uint jugador_index){
-	for(int i = jugador_index; i < MAX_CANT_PERROS_VIVOS; i++){
+	int i;	
+	for(i = jugador_index; i < MAX_CANT_PERROS_VIVOS; i++){
 		if(scheduler.tasks[2*i + jugador_index].gdt_index == NULL){
 			return 2*i + jugador_index;
 		}
@@ -102,3 +106,17 @@ ushort sched_atender_tick(){
 }
 
 
+void sched_debug_interrupcion(){
+	debug_screen_on = 1;
+
+
+	screen_make_backup();
+	screen_pantalla_debug();	
+	while(debug_on == 1){
+		;
+	}	
+	debug_on = 1;
+	screen_restore_backup();
+	
+	debug_screen_on = 0;
+}

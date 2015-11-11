@@ -8,6 +8,9 @@
 #ifndef __ISR_H__
 #define __ISR_H__
 
+#include "sched.h"
+#include "game.h"
+
 void _isr0x00();
 void _isr0x01();
 void _isr0x02();
