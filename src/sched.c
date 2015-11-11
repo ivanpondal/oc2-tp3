@@ -38,7 +38,7 @@ int sched_buscar_indice_tarea(uint gdt_index) {
 int sched_buscar_tarea_libre(uint jugador_index){
 	for(int i = jugador_index; i < MAX_CANT_PERROS_VIVOS; i++){
 		if(scheduler.tasks[2*i + jugador_index].gdt_index == NULL){
-			return i;
+			return 2*i + jugador_index;
 		}
 	}
     return -1;
@@ -60,7 +60,6 @@ void sched_agregar_tarea(perro_t *perro){
 }
 
 void sched_remover_tarea(unsigned int gdt_index){
-	breakpoint();
 	int indice_tarea_remover = sched_buscar_indice_tarea(gdt_index);
 
 	if(indice_tarea_remover != -1){
@@ -85,12 +84,7 @@ uint sched_proxima_a_ejecutar(){
 			encontre_proximo = TRUE;
 		}
 		else if(tarea_siguiente.gdt_index != NULL && tarea_siguiente.perro != NULL){
-			if(tarea_actual.perro == NULL){
-				encontre_proximo = TRUE;
-			}
-			else if(tarea_siguiente.perro->jugador->index != tarea_actual.perro->jugador->index){
-				encontre_proximo = TRUE;
-			}
+			encontre_proximo = TRUE;
 		}
 	}
     return i;
