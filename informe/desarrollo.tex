@@ -1,3 +1,43 @@
+\subsection{Pasaje a modo protegido y segmentación}
+En esta sección explicaremos como realizamos la creación de la \textit{Global Descriptor Table} (GDT) y como, una vez hecho esto, pasamos a modo protegido.
+
+\subsubsection{Inicialización de la GDT}
+Del código que viene dado se deben agregar en principio cinco segmentos (Para la parte de tareas tuvimos que agregar algunos mas los cuales serán explicados en su correspondiente sección), estos estan conformados por dos de datos, dos de código y uno de la pantalla de video, con niveles de privilegio de 0 o 3.
+
+Para esto seteamos cada segmento, a partir del indice 8 de la gdt por restricciones del trabajo práctico. Las posiciones anteriores a la 8 quedan en 0. Los cuatro primeros segmentos direccionan los primeros 500 MB de memoria, desde la posición 0 hasta el megabyte número 500, en ese espacio entran 128.000 (0x1F400) bloques de 4 KB por lo tanto el limite sera 0x1F3FF ya que contamos desde el 0, los de codigo son del tipo 10 (0x0A) y los de datos del tipo (0x01), el limite es (0xF3FF) y el nivel de privilegio 0 o 3 segun corresponda. La granularidad esta activada (0x01). Los bits P, L, D/B y AVL se ponen en 1, 0, 1 y 0 respectivamente para todas las entradas.
+
+\subsubsection{Pasaje a modo protegido}
+
+Antes de pasar a modo protegido el sistema operativo necesita saber donde esta la gdt y cual es su tamaño para esto cargamos a traves de lgdt el registro gdtr el cual tiene esta información. También habilitamos A20 para permitir el acceso a direcciones superiores a $2^{20}$ bits.
+
+Luego realizamos un salto con la instruccion \textit{jmp 0x40:modoprotegido} para poner a cs en el valor correcto, el 0x40 es para posicionarnos en el segmento de codigo de nivel 0 (indice 8 en la gdt). Una vez hecho esto estamos listos para pasar a modo protegido poniendo el bit PE de cr0 en 1. 
+
+Luego debemos establecer los selectores de segmentos de datos de nivel 0 y la base de la pila la cual se requirió que estuviera en la posición 0x27000
+
+\begin{lstlisting}
+	mov ax, 0x50	
+	mov ds, ax
+	mov es, ax
+	mov gs, ax
+	mov fs, ax
+	mov ss, ax
+	mov ebp, 0x27000
+	mov esp, ebp
+\end{lstlisting}
+
+Hay un segmento mas que seteamos con el único objetivo de verificar el buen funcionamiento de la segmentación, este es \textit{GDT\_ID12\_SCREEN\_DESC}, en la funcion \textit{pintar\_esquina\_superior\_izquierda} definida en \textit{kernelasm} se puede ver como accedemos al segmento y luego reescribimos los dos primeros pixels de la pantalla
+
+\begin{lstlisting}
+	pintar_esquina_superior_izquierda:
+	mov ax, 0x60	; Offset de SCREEN
+	mov ds, ax
+	mov byte [0x0], 'X'
+	mov byte [0x1], 0x4
+	mov ax, 0x50	; Offset de KERNEL_DATA
+	mov ds, ax
+	ret	
+\end{lstlisting}
+
 \subsection{Interrupciones básicas}
 En esta sección explicaremos como realizamos la creación de la \textit{Interrupt Descriptors Table} (IDT) y su posterior carga en el \textit{kernel}.
 
@@ -175,3 +215,30 @@ kernel.
 	mov cr0, eax
 	\end{lstlisting}
 \end{enumerate}
+
+\subsection{Tareas}
+
+\subsubsection{Entradas de la GDT}
+
+Al llegar a esta parte del trabajo tuvimos que agregar 18 entradas nuevas a la GDT, estas describen las TSS's de tarea\_inicial, IDLE, los 8 perros posibles que puede tener el jugador A simultaneamente y lo mismo para el jugador B. Estos segmentos van del numero 13 al 30
+
+Para configurar las entradas de la gdt se pone como base el 0, esto será luego seteado correctamente por \textit{tss\_inicializar} la cual pone la dirección de la ubicación de la tss correspondiente, cada segmento tendrá como limite 104 Bytes (0x0067) para que la GDT interprete eso como bytes ponemos la granularidad en 0. El nivel de privilegio para las tareas de los jugadores será de 3. Las tareas que serán manejadas unicamente por el sistema, \textit{tarea\_inicial} y IDLE tendran el DPL en 0. El bit de present va en 1 para todos los segmentos y todo lo demás quedara en 0.
+
+\subsubsection{Inicialización de las TSS}
+Para completar las TSS's esta la función \textbf{tss\_inicializar}, esta como se dijo previamente pone la base correcta a los 18 segmentos descriptores de TSS's. En el codigo se puede ver el macro TSS\_PERRO\_ENTRY el cual esta definido en \textit{tss.h} y realiza dicha operación de seteo de base para los segmentos de los perros.
+
+Para la configuración de las opciones de la TSS IDLE pusimos la dirección de la pila en el mismo lugar que la del kernel (0x27000), aunque las pilas de menores privilegios, esp1 y esp2 estan en 0, cr3 vale igual que el cr3 del kernel, iomap vale 0xFFFF, y los selectores de segmentos se pusieronsegun correspondian. En eip ponemos la dirección de la tarea la cual se aclara en la consigna que es la 0x16000.
+
+Una vez que esta todo configurado, inicializamos las tss y cargamos la tarea inicial en kernel.asm
+
+\begin{lstlisting}
+	; Cargar tarea inicial
+	mov ax, 0x68
+	ltr ax
+\end{lstlisting}
+
+\subsubsection{Construcción de Tareas}
+
+
+\subsubsection{La Interrupción 0x46}
+En nuestro sistema operativo la interrupción 0x46 es la rutina de atención de servicios, es ejecutada por los jugadores para decidir las acciones de los perros. Estas pueden variar entre  \textit{game\_perro\_mover}, \textit{game\_perro\_cavar}, \textit{game\_perro\_olfatear} y \textit{game\_perro\_recibir\_orden} todos estos métodos estan definidos en \textit{perro.c} por la catedra. Una vez hecha la acción si todavia el quantum no se acabo se llama a la tarea idle para que esta espere hasta el turno del siguiente jugador.
