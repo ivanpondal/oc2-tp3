@@ -89,7 +89,6 @@ void screen_stop_game_show_winner(jugador_t *j);
 void screen_make_backup();
 void screen_restore_backup();
 void screen_pantalla_debug();
-void screen_debug();
 
 
 #endif  /* !__SCREEN_H__ */
