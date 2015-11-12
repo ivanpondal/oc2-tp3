@@ -2,17 +2,15 @@
 En esta sección explicaremos como realizamos la creación de la \textit{Global Descriptor Table} (GDT) y como, una vez hecho esto, pasamos a modo protegido.
 
 \subsubsection{Inicialización de la GDT}
-Del código que viene dado se deben agregar en principio cinco segmentos (Para la parte de tareas tuvimos que agregar algunos mas los cuales serán explicados en su correspondiente sección), estos estan conformados por dos de datos, dos de código y uno de la pantalla de video, con niveles de privilegio de 0 o 3.
+Del código que viene dado se deben agregar en principio cinco segmentos (Para la parte de tareas tuvimos que agregar algunos mas los cuales serán explicados en breve), estos estan conformados por dos de datos, dos de código y uno de la pantalla de video, con niveles de privilegio de 0 o 3.
 
-Para esto seteamos cada segmento, a partir del indice 8 de la gdt por restricciones del trabajo práctico. Las posiciones anteriores a la 8 quedan en 0. Los cuatro primeros segmentos direccionan los primeros 500 MB de memoria, desde la posición 0 hasta el megabyte número 500, en ese espacio entran 128.000 (0x1F400) bloques de 4 KB por lo tanto el limite sera 0x1F3FF ya que contamos desde el 0, los de codigo son del tipo 10 (0x0A) y los de datos del tipo (0x01), el limite es (0xF3FF) y el nivel de privilegio 0 o 3 segun corresponda. La granularidad esta activada (0x01). Los bits P, L, D/B y AVL se ponen en 1, 0, 1 y 0 respectivamente para todas las entradas.
+Para esto seteamos cada segmento, a partir del índice 8 de la gdt por restricciones del trabajo práctico. Las posiciones anteriores a la 8 quedan en 0. Los cuatro primeros segmentos direccionan los primeros 500 MB de memoria, desde la posición 0 hasta el megabyte número 500, en ese espacio entran 128.000 (0x1F400) bloques de 4 KB por lo tanto el límite será 0x1F3FF ya que contamos desde el 0, los de código son del tipo 10 (0x0A) y los de datos del tipo (0x01), el límite es (0xF3FF) y el nivel de privilegio 0 o 3 según corresponda. La granularidad esta activada (0x01). Los bits P, L, D/B y AVL se ponen en 1, 0, 1 y 0 respectivamente para todas las entradas.
 
+Al crear la parte de tareas del sistema tuvimos que agregar 18 segmentos nuevos a la GDT, estos seran los correspondientes a las TSS's de tarea\_inicial, IDLE, los 8 perros posibles que puede tener el jugador A simultaneamente y lo mismo para el jugador B (Hablaremos mas de esto en la parte de tareas del informe). Estos segmentos van del número 13 al 30
 
+Para configurar estos segmentos de la GDT se pone como base el 0, esto será luego seteado correctamente por la función \textit{tss\_inicializar} la cual pone la dirección de la ubicación de la TSS correspondiente, cada segmento tendrá como limite 104 Bytes (0x0067) para que la GDT interprete eso como bytes ponemos la granularidad en 0. El nivel de privilegio para las tareas de los jugadores será de 3. Las tareas que serán manejadas unicamente por el sistema, \textit{tarea\_inicial} y IDLE tendran el DPL en 0. El bit de present va en 1 para todos los segmentos y todo lo demás quedará en 0. 
 
-Al crear la parte de tareas del sistema tuvimos que agregar 18 segmentos nuevos a la GDT, estos seran los correspondientes a las TSS's de tarea\_inicial, IDLE, los 8 perros posibles que puede tener el jugador A simultaneamente y lo mismo para el jugador B (Hablaremos mas de esto en la parte de tareas del informe). Estos segmentos van del numero 13 al 30
-
-Para configurar estos segmentos de la gdt se pone como base el 0, esto será luego seteado correctamente por la función \textit{tss\_inicializar} la cual pone la dirección de la ubicación de la tss correspondiente, cada segmento tendrá como limite 104 Bytes (0x0067) para que la GDT interprete eso como bytes ponemos la granularidad en 0. El nivel de privilegio para las tareas de los jugadores será de 3. Las tareas que serán manejadas unicamente por el sistema, \textit{tarea\_inicial} y IDLE tendran el DPL en 0. El bit de present va en 1 para todos los segmentos y todo lo demás quedara en 0. 
-
-El funcionamiento de \textit{tss\_inicializar} es muy simple, hay 4 variables globales en \textit{tss.c} las cuales son tss\_inicial, tss\_idle, tss\_jugadorA y tss\_jugadorB, los segmentos deberian tener como base estas direcciones por lo que el objetivo de esta función es setearlos correctamente, para eso utilizamos un macro definido en \textit{tss.h} llamado TSS\_PERRO\_ENTRY el cual basicamente reconoce a partir de sus parametros que entrada de la gdt se desea setear y luego se pone como base la dirección del perro correspondiente segun a cual jugador corresponda.
+El funcionamiento de \textit{tss\_inicializar} es muy simple, hay 4 variables globales en \textit{tss.c} las cuales son tss\_inicial, tss\_idle, tss\_jugadorA y tss\_jugadorB, los segmentos deberían tener como base estas direcciones por lo que el objetivo de esta función es setearlos correctamente, para eso utilizamos un macro definido en \textit{tss.h} llamado TSS\_PERRO\_ENTRY el cual basicamente reconoce a partir de sus parametros que entrada de la gdt se desea setear y luego se pone como base la dirección del perro correspondiente segun a cual jugador corresponda.
 
 \begin{lstlisting}
 
@@ -55,9 +53,9 @@ void tss_inicializar() {
 
 \subsubsection{Pasaje a modo protegido}
 
-Antes de pasar a modo protegido el sistema operativo necesita saber donde esta la gdt y cual es su tamaño para esto cargamos a traves de lgdt el registro gdtr el cual tiene esta información. También habilitamos A20 para permitir el acceso a direcciones superiores a $2^{20}$ bits.
+Antes de pasar a modo protegido el sistema operativo necesita saber donde esta la gdt y cual es su tamaño para esto cargamos a traves de lgdt el registro GDTR, el cual tiene esta información. También habilitamos A20 para permitir el acceso a direcciones superiores a $2^{20}$ bits.
 
-Luego realizamos un salto con la instruccion \textit{jmp 0x40:modoprotegido} para poner a cs en el valor correcto, el 0x40 es para posicionarnos en el segmento de codigo de nivel 0 (indice 8 en la gdt). Una vez hecho esto estamos listos para pasar a modo protegido poniendo el bit PE de cr0 en 1. 
+Luego realizamos un salto con la instrucción \textit{jmp 0x40:modoprotegido} para poner a cs en el valor correcto, el 0x40 es para posicionarnos en el segmento de código de nivel 0 (indice 8 en la gdt). Una vez hecho esto estamos listos para pasar a modo protegido poniendo el bit PE de cr0 en 1. 
 
 Luego debemos establecer los selectores de segmentos de datos de nivel 0 y la base de la pila la cual se requirió que estuviera en la posición 0x27000
 
@@ -72,7 +70,7 @@ Luego debemos establecer los selectores de segmentos de datos de nivel 0 y la ba
 	mov esp, ebp
 \end{lstlisting}
 
-Hay un segmento mas que seteamos con el único objetivo de verificar el buen funcionamiento de la segmentación, este es \textit{GDT\_ID12\_SCREEN\_DESC}, en la funcion \textit{pintar\_esquina\_superior\_izquierda} definida en \textit{kernelasm} se puede ver como accedemos al segmento y luego reescribimos los dos primeros pixels de la pantalla
+Hay un segmento mas que seteamos con el único objetivo de verificar el buen funcionamiento de la segmentación, este es \textit{GDT\_ID12\_SCREEN\_DESC}, en la función \textit{pintar\_esquina\_superior\_izquierda} definida en \textit{kernelasm} se puede ver como accedemos al segmento y luego reescribimos los dos primeros pixels de la pantalla
 
 \begin{lstlisting}
 	pintar_esquina_superior_izquierda:
@@ -203,7 +201,7 @@ serán idénticos a los de \texttt{mmu\_mapear\_pagina}.
 \begin{enumerate}
 	\setcounter{enumi}{6}
 	\item Seteamos en el Page Table Entry el bit de \texttt{present} en 0 y
-		limpamos las tablas cacheadas para reflejar los cambios.
+		limpiamos las tablas cacheadas para reflejar los cambios.
 	\begin{lstlisting}
 	*ptr_pte = *ptr_pte AND 0xFFFFFFFE
 	Limpio cache de tablas
@@ -341,18 +339,18 @@ Es así entonces que para lograr esto realizamos la siguiente secuencia de pasos
 	\item Dependiendo del tipo de perro que se lanzó, mapeamos su código de la
 		dirección correspondiente.
 	\begin{lstlisting}
-	mapeamos direccion virtual del codigo en el mapa con la fisica
-	mapeamos direccion de codigo de tarea con la fisica correspondiente
+	mapeamos dirección virtual del código en el mapa con la física
+	mapeamos dirección de codigo de tarea con la física correspondiente
 	\end{lstlisting}
 	\item Dependiendo del jugador, mapeamos la memoria compartida
 	\begin{lstlisting}
-	mapeamos la direccion virtual de memoria compartida con la fisica
+	mapeamos la dirección virtual de memoria compartida con la física
 	correspondiente dependiendo del jugador
 	\end{lstlisting}
 	\item Copiamos el código a la dirección física donde está mapeado
 	\begin{lstlisting}
-	mapeamos direccion donde copiar el codigo en mapa de memoria actual
-	copiamos el codigo a la direccion mapeada
+	mapeamos dirección donde copiar el código en mapa de memoria actual
+	copiamos el codigo a la dirección mapeada
 	desmapeamos la direccion del mapa de memoria actual
 	\end{lstlisting}
 \end{enumerate}
@@ -391,7 +389,7 @@ A continuación explicamos que es lo que hace cada una de las rutinas de atenci�
 
 	Esta función lo que hará es considerar dos posibles situaciones: una en la que el juego se encuentra pausado pues se ha cometido una excepción en modo debug, provocando que se active la pantalla especial, y por lo tanto la única tecla que tiene validez es la ``y'', que permitirá salir de dicha pantalla. La otra es que el juego este en modo normal y por lo tanto todas las teclas asociadas a alguna función del juego (según se señala en el enunciado) activan la misma al ser presionadas.
 
-	Al volver de \texttt{game\_atender\_teclado}, se restauran los registros y se finaliza la rutina.
+	Al volver de \texttt{game\_atender\_teclado}, se restaurán los registros y se finaliza la rutina.
 
 	\subsubsection{Servicios del sistema}
 	Esta función toma hasta dos parámetros por registro. Por eax siempre recibe el tipo de pedido requerido (moverse, cavar, olfatear, recibir orden). En caso de que el servicio solicitado sea mover al perro, se tomará un parámetro adicional por ecx con alguno de los cuatro códigos de dirección válidos. También para recibir orden se tomará un parámetro más, para determinar de que jugador se desea oir la última orden.
