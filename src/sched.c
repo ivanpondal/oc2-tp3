@@ -103,11 +103,3 @@ ushort sched_atender_tick(){
 	game_perro_actual = scheduler.tasks[scheduler.current].perro;
     return scheduler.tasks[scheduler.current].gdt_index;
 }
-
-
-void sched_debug_interrupcion(){
-	debug_screen_on = TRUE;
-
-	screen_make_backup();
-	screen_pantalla_debug();	
-}

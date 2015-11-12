@@ -22,8 +22,6 @@ extern fin_intr_pic1
 ;; Sched
 extern sched_atender_tick
 extern sched_tarea_actual
-extern sched_debug_interrupcion
-
 
 ;; Game 
 extern game_atender_teclado
@@ -31,8 +29,8 @@ extern game_syscall_manejar
 extern game_perro_actual
 extern game_perro_termino
 
-;; Clock
-extern esta_pantalla_debug_activada
+;; Screen
+extern screen_pantalla_debug
 
 ;;
 ;; Definición de MACROS
@@ -51,12 +49,13 @@ _isr%1:
 	mov dword [debug_info + 16], esi
 	mov dword [debug_info + 20], edi
 	mov dword [debug_info + 24], ebp
-	mov dword [debug_info + 28], esp
+	mov eax, [esp + 12] ; esp
+	mov dword [debug_info + 28], eax
  
-	mov eax, [esp + 12] ; eip
+	mov eax, [esp] ; eip
 	mov dword [debug_info + 32], eax ;eip
 
-	mov ax, cs
+	mov eax, [esp + 4] ; cs
 	mov word [debug_info + 36], ax
 	mov ax, ds
 	mov word [debug_info + 38], ax
@@ -66,10 +65,11 @@ _isr%1:
 	mov word [debug_info + 42], ax
 	mov ax, gs
 	mov word [debug_info + 44], ax
-	mov ax, ss
+	mov eax, [esp + 16] ; ss
 	mov word [debug_info + 46], ax
 
-	;mov dword [debug_info + 48], eax ; guardo flags
+	mov eax, [esp + 8] ; flags
+	mov dword [debug_info + 48], eax ; guardo flags
 
 	mov eax, cr0
 	mov dword [debug_info + 52], eax
@@ -80,18 +80,21 @@ _isr%1:
 	mov eax, cr4
 	mov dword [debug_info + 64], eax
 
-	mov eax, [esp]
+	mov ebx, [esp + 12]	; esp
+	mov eax, [ebx]
 	mov dword [debug_info + 68], eax
-	mov eax, [esp + 4]
+	mov eax, [ebx + 4]
 	mov dword [debug_info + 72], eax
-	mov eax, [esp + 8]
+	mov eax, [ebx + 8]
 	mov dword [debug_info + 76], eax
-	mov eax, [esp + 12]
+	mov eax, [ebx + 12]
 	mov dword [debug_info + 80], eax
-	mov eax, [esp + 16]
+	mov eax, [ebx + 16]
 	mov dword [debug_info + 84], eax
 
-	call sched_debug_interrupcion
+	mov dword [debug_info + 88], %1
+
+	call screen_pantalla_debug
 
 	.matarTarea:
 	push dword [game_perro_actual]
@@ -101,11 +104,6 @@ _isr%1:
 	jmp 0x70:0
 
 %endmacro
-
-;;
-;; Datos
-;; -------------------------------------------------------------------------- ;;
-; Scheduler
 
 ;;
 ;; Rutina de atención de las EXCEPCIONES
