@@ -40,6 +40,9 @@ void task(int x_origen, int y_origen) {
 	}
 	while (syscall_cavar() != 0)
 	{}
+	int a = 4;
+	int b = 0;
+	a /= b;
 	
 
 	ir_hacia_desde(x_origen, y_origen, x_actual, y_actual);

@@ -22,13 +22,14 @@ extern fin_intr_pic1
 ;; Sched
 extern sched_atender_tick
 extern sched_tarea_actual
-extern sched_remover_tarea
 extern sched_debug_interrupcion
 
 
 ;; Game 
 extern game_atender_teclado
 extern game_syscall_manejar
+extern game_perro_actual
+extern game_perro_termino
 
 ;; Clock
 extern esta_pantalla_debug_activada
@@ -41,22 +42,20 @@ extern esta_pantalla_debug_activada
 global _isr%1
 
 _isr%1:
-	str ax	;COMENTAR ESTAS LINEAS SI SE QUIERE  
-	push ax	;SACAR EL PANIC DE LAS EXCEPCIONES
-
-
-    	mov dword [debug_info + 00], eax
-    	mov dword [debug_info + 04], ebx
-    	mov dword [debug_info + 08], ecx
-    	mov dword [debug_info + 12], edx
-    	mov dword [debug_info + 16], esi
-    	mov dword [debug_info + 20], edi
-    	mov dword [debug_info + 24], ebp
-   	mov dword [debug_info + 28], esp
+	cmp dword [debug_on], 0
+	je .matarTarea
+	mov dword [debug_info + 00], eax
+	mov dword [debug_info + 04], ebx
+	mov dword [debug_info + 08], ecx
+	mov dword [debug_info + 12], edx
+	mov dword [debug_info + 16], esi
+	mov dword [debug_info + 20], edi
+	mov dword [debug_info + 24], ebp
+	mov dword [debug_info + 28], esp
  
-	mov eax, [esp+12] ; eip
+	mov eax, [esp + 12] ; eip
 	mov dword [debug_info + 32], eax ;eip
-		
+
 	mov ax, cs
 	mov word [debug_info + 36], ax
 	mov ax, ds
@@ -69,46 +68,37 @@ _isr%1:
 	mov word [debug_info + 44], ax
 	mov ax, ss
 	mov word [debug_info + 46], ax
-    
-    	xor eax, eax
-    	pushf    ; obtenemos el registro
-    	pop ax   ; eflags
-    	mov dword [debug_info + 48], eax ; guardo flags
-    
-   	mov eax, cr0
-  	mov dword [debug_info + 52], eax
-  	mov eax, cr2
-  	mov dword [debug_info + 56], eax
-  	mov eax, cr3
-  	mov dword [debug_info + 60], eax
-  	mov eax, cr4
-  	mov dword [debug_info + 64], eax
-  	
-  	mov eax, [esp]
-  	mov dword [debug_info + 68], eax
-  	mov eax, [esp+4]
-  	mov dword [debug_info + 72], eax
-  	mov eax, [esp+8]
-  	mov dword [debug_info + 76], eax
-  	mov eax, [esp+12]
-  	mov dword [debug_info + 80], eax
-    	mov eax, [esp+16]
-  	mov dword [debug_info + 84], eax
 
-	sti
+	;mov dword [debug_info + 48], eax ; guardo flags
 
-	call sched_remover_tarea
-	xor eax,eax
-	mov eax,1
-	cmp [debug_on],eax
-	jne .nodebuguear
+	mov eax, cr0
+	mov dword [debug_info + 52], eax
+	mov eax, cr2
+	mov dword [debug_info + 56], eax
+	mov eax, cr3
+	mov dword [debug_info + 60], eax
+	mov eax, cr4
+	mov dword [debug_info + 64], eax
+
+	mov eax, [esp]
+	mov dword [debug_info + 68], eax
+	mov eax, [esp + 4]
+	mov dword [debug_info + 72], eax
+	mov eax, [esp + 8]
+	mov dword [debug_info + 76], eax
+	mov eax, [esp + 12]
+	mov dword [debug_info + 80], eax
+	mov eax, [esp + 16]
+	mov dword [debug_info + 84], eax
+
 	call sched_debug_interrupcion
-	.nodebuguear:
+
+	.matarTarea:
+	push dword [game_perro_actual]
+	call game_perro_termino
+	pop ax
 	;Salto a la tarea idle
 	jmp 0x70:0
-
-
-
 
 %endmacro
 
@@ -150,14 +140,10 @@ _isr0x20:
 	pushad
 
 	call fin_intr_pic1
-	
 
-	xor eax,eax
-	mov eax,1
-	cmp [debug_screen_on],eax
+	cmp dword [debug_screen_on], 1
 	je .fin
-	xor eax, eax	
-	
+
 	call sched_atender_tick
 
 	str cx

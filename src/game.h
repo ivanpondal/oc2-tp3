@@ -63,15 +63,14 @@ extern perro_t *game_perro_actual;
 
 typedef struct jugador_t
 {
-  uint index;    // 0 o 1
-  perro_t perros[MAX_CANT_PERROS_VIVOS];   // los perros del jugador
-  uint x_cucha, y_cucha;
+	uint index;    // 0 o 1
+	perro_t perros[MAX_CANT_PERROS_VIVOS];   // los perros del jugador
+	uint x_cucha, y_cucha;
 
-  // posicion, puntos, ordenes, etc.
+	// posicion, puntos, ordenes, etc.
 	// completar si es necesario.
 	int x, y;  // posicion
-  uint puntos;
-
+	uint puntos;
 } jugador_t;
 
 extern jugador_t jugadorA, jugadorB;

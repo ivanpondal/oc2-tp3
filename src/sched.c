@@ -27,14 +27,13 @@ void sched_inicializar(){
 
 
 int sched_buscar_indice_tarea(uint gdt_index) {
-	int indice_tarea = -1;
 	int i;
 	for(i = 0; i < MAX_CANT_TAREAS_VIVAS; i++){
 		if(scheduler.tasks[i].gdt_index == gdt_index){
 			return i;
 		}
 	}
-    return indice_tarea;
+    return -1;
 }
 
 
@@ -107,16 +106,8 @@ ushort sched_atender_tick(){
 
 
 void sched_debug_interrupcion(){
-	debug_screen_on = 1;
-
+	debug_screen_on = TRUE;
 
 	screen_make_backup();
 	screen_pantalla_debug();	
-	while(debug_on == 1){
-		;
-	}	
-	debug_on = 1;
-	screen_restore_backup();
-	
-	debug_screen_on = 0;
 }

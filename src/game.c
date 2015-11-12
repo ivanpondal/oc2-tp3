@@ -107,12 +107,18 @@ void game_terminar_si_es_hora(){
 }
 
 void game_jugador_debug(){
-		if(debug_on == 0){
-			debug_on = 1;
-			print("MODO DEBUG ACTIVADO",55,0,0x0f0f);
+		if(debug_screen_on == TRUE){
+			debug_screen_on = FALSE;
+			screen_restore_backup();
 		}
-		else{ 
-			debug_on = 0;
-			screen_pintar_rect(0, 0x00, 0, 53, 1, 23);
+		else{
+			if(debug_on == FALSE){
+				debug_on = TRUE;
+				print("MODO DEBUG ACTIVADO", 55, 0, 0x0f0f);
+			}
+			else{
+				debug_on = FALSE;
+				screen_pintar_rect(0, 0x00, 0, 53, 1, 23);
+			}
 		}
 }

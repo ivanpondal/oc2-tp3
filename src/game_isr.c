@@ -103,8 +103,8 @@ void game_atender_teclado(unsigned char tecla)
 			case KB_s: game_jugador_moverse(&jugadorA, 0,  1); break;
 			case KB_a: game_jugador_moverse(&jugadorA, -1,  0); break;
 			case KB_d: game_jugador_moverse(&jugadorA, 1,  0); break;
-		
-	 		case KB_q: game_jugador_lanzar_perro(&jugadorA, TIPO_1, POS_INIT_A_X, POS_INIT_A_Y); break;
+
+			case KB_q: game_jugador_lanzar_perro(&jugadorA, TIPO_1, POS_INIT_A_X, POS_INIT_A_Y); break;
 			case KB_e: game_jugador_lanzar_perro(&jugadorA, TIPO_2, POS_INIT_A_X, POS_INIT_A_Y); break;
 
 			case KB_z: game_jugador_dar_orden(&jugadorA, 1); break;
@@ -116,7 +116,7 @@ void game_atender_teclado(unsigned char tecla)
 			case KB_j: game_jugador_moverse(&jugadorB,  -1, 0); break;
 			case KB_l: game_jugador_moverse(&jugadorB,  1, 0); break;
 
-	 		case KB_u: game_jugador_lanzar_perro(&jugadorB, TIPO_1, POS_INIT_B_X, POS_INIT_B_Y); break;
+			case KB_u: game_jugador_lanzar_perro(&jugadorB, TIPO_1, POS_INIT_B_X, POS_INIT_B_Y); break;
 			case KB_o: game_jugador_lanzar_perro(&jugadorB, TIPO_2, POS_INIT_B_X, POS_INIT_B_Y); break;
 
 
@@ -126,14 +126,12 @@ void game_atender_teclado(unsigned char tecla)
 
 			case KB_shiftL: letra = "shiftL"; break;
 			case KB_shiftR: letra = "shiftR"; break;
-		
+
 			case KB_y: game_jugador_debug(); break;
 
-		
 			default: break;
 		}
 	}
 
 	print(letra, 74, 0, 0x7);
-
 }
