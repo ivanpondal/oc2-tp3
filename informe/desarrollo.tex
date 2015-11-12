@@ -316,19 +316,35 @@ Las entradas de la IDT se agregarán, al igual que antes, con el macro \texttt{I
 A continuación explicamos que es lo que hace cada una de las rutinas de atención.
 
 	\subsubsection{Reloj}
-	Esencialmente, el código de esta rutina es el mismo que el sugerido en la clase práctica de scheduler. La única diferencia real es que se agregan algunas líneas usadas por el modo debug.
+	Esencialmente, el código de esta rutina es el mismo que el sugerido en la clase práctica de scheduler. La única diferencia real es que se agregan algunas líneas usadas para implementar el modo debug.
 
 	Como primer paso, tras salvaguardar todos los registros para mantener la transparencia de la interrupción, llamamos a la función \texttt{fin\_intr\_pic1} que se encarga de avisarle al PIC que el IRQ del reloj ya ha sido atendido, y por lo tanto el PIC nuevamente está disponible para recibir IRQs. 
 
-	A continuación se llama a la función \texttt{sched\_atender\_tick} la cual se encargará de actualizar todo lo que sea necesario respecto del juego: posición del perro que está corriendo actualmente; removerlo del scheduler en caso de que deje de estar libre, ya sea porque volvió a la cucha y descargó todos sus huesos, o bien porque provocó una excepción; y finalmente setear la siguiente tarea a ejecutar, devolviendo el índice de su TSS en la GDT como output.
+	Luego se hace la comparación 
+
+	\texttt{cmp dword [debug\_screen\_on], 1}
+
+	para ver si la pantalla especial que salta cuando se produce una excepción en modo debug está activada. En caso afirmativo, simplemente se salta al final de la rutina, sin actualizar el juego ni intercambiar tareas. Esto significa que se seguirá ejecutando la tarea idle hasta que hasta que \texttt{debug\_screen\_on == 0}.
+
+	A continuación se llama a la función \texttt{sched\_atender\_tick} \footnote{La explicación correspondiente a la implementación de esta función se desarrolla en la sección del scheduler.} la cual se encargará de actualizar todo lo que sea necesario respecto del juego: posición del perro que está corriendo actualmente; removerlo del scheduler en caso de que deje de estar libre, ya sea porque volvió a la cucha y descargó todos sus huesos, o bien porque provocó una excepción; y finalmente setear la siguiente tarea a ejecutar, devolviendo el índice de su TSS en la GDT como output.
 
 	Como dicho output se recibe por el registro ax, se lo compara contra cx (al que previamente le cargamos el valor actual del \textit{task register} con \texttt{str}) y en caso de ser iguales simplemente se sigue ejecutando la misma tarea. Caso contrario debe realizarse el \textit{task switching}, haciendo un jump far con el selector de segmento correspondiente al tss de la siguiente tarea.
 
 	Finalmente, restauramos los registros con los valores que tenían antes de la interrupción.
 
 	\subsubsection{Teclado}
+	Nuevamente salvamos los valores de todos los registros y llamamos a \texttt{fin\_intr\_pic1}. Luego limpiamos eax, y leemos el \textit{scan code} que se encuentra en el puerto 0x60. Llamamos a la función \texttt{game\_atender\_teclado} pasándole como parámetro dicho \textit{scan code}. 
+
+	Esta función lo que hará es considerar dos posibles situaciones: una en la que el juego se encuentra pausado pues se ha cometido una excepción en modo debug, provocando que se active la pantalla especial, y por lo tanto la única tecla que tiene validez es la ``y'', que permitirá salir de dicha pantalla. La otra es que el juego este en modo normal y por lo tanto todas las teclas asociadas a alguna función del juego (según se señala en el enunciado) activan la misma al ser presionadas.
+
+	Al volver de \texttt{game\_atender\_teclado}, se restauran los registros y se finaliza la rutina.
 
 	\subsubsection{Servicios del sistema}
+	Esta función toma hasta dos parámetros por registro. Por eax siempre recibe el tipo de pedido requerido (moverse, cavar, olfatear, recibir orden). En caso de que el servicio solicitado sea mover al perro, se tomará un parámetro adicional por ecx con alguno de los cuatro códigos de dirección válidos. También para recibir orden se tomará un parámetro más, para determinar de que jugador se desea oir la última orden.
+
+	Lo primero que hace la rutina, antes del \texttt{pushad} es pushear eax. En un instante veremos la justificación de esto. Se llama a \texttt{game\_syscall\_manejar} pasándole los dos parámetros recibidos (en caso de que el servicio sea cavar u olfatear en ecx habrá basura pero se ignorará completamente). Esta función no hace más que realizar un switch para determinar cuál será la función que resuelva efectivamente el pedido. Dichas funciones ya venían dadas por la cátedra, salvo \texttt{game\_perro\_recibir\_orden} cuya implementación, como puede verse, es muy simple.
+
+	Al retornar a la rutina de atención, si el servicio solicitado era olfatear o recibir orden, entonces se retornará un valor por eax. Aquí es donde entra en juego el \texttt{push eax} que habíamos hecho al principio de todo. Como \texttt mete 8 registros de 4 bytes cada uno en la pila, sabemos que nuestro primer \texttt{push} está en esp+32. Copiamos el actual valor de eax ahí. La razón por la que hacemos esto es que  al realizar el \texttt{popad} se pisa el valor de eax, perdiendo el resultado de la función. Pero por lo que hicimos, simplemente hace falta realizar un \texttt{pop eax} al finalizar la rutina para recuperarlo.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
