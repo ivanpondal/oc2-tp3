@@ -31,7 +31,7 @@ typedef unsigned int   uint;
 
 /* Indices en la gdt */
 /* -------------------------------------------------------------------------- */
-#define GDT_COUNT 31
+#define GDT_COUNT 31		//Lo aumentamos en 1 para poder tener el segmento de screen
 
 #define GDT_IDX_NULL_DESC           0
 

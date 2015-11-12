@@ -35,8 +35,6 @@ idt_descriptor IDT_DESC = {
 */
 
 
-// descomentar para usar, seteando segsel y attr segun corresponda
-
 #define IDT_ENTRY(numero, dpl)                                                                                   \
     idt[numero].offset_0_15 = (unsigned short) ((unsigned int)(&_isr ## numero) & (unsigned int) 0xFFFF);        \
     idt[numero].segsel = (unsigned short) 0x40;                                                                  \

@@ -20,7 +20,6 @@ void wait(int pseudosecs)
 
 uint game_syscall_manejar(uint syscall, uint param1)
 {
-    // ~ completar llamando a las funciones que haga falta ~
 	int ret = 0;
 	switch(syscall){
 		case 1:
@@ -88,7 +87,6 @@ void game_atender_tick(perro_t *perro)
 // ~~~ debe atender la interrupción de teclado, se le pasa la tecla presionada
 void game_atender_teclado(unsigned char tecla)
 {
-	char* letra = "      ";
 	if(debug_screen_on){
 		switch (tecla)
 		{
@@ -124,14 +122,9 @@ void game_atender_teclado(unsigned char tecla)
 			case KB_n: game_jugador_dar_orden(&jugadorB, 2); break;
 			case KB_m: game_jugador_dar_orden(&jugadorB, 3); break;
 
-			case KB_shiftL: letra = "shiftL"; break;
-			case KB_shiftR: letra = "shiftR"; break;
-
 			case KB_y: game_jugador_debug(); break;
 
 			default: break;
 		}
 	}
-
-	print(letra, 74, 0, 0x7);
 }
