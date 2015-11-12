@@ -38,7 +38,8 @@ Hay un segmento mas que seteamos con el único objetivo de verificar el buen fun
 	ret	
 \end{lstlisting}
 
-\subsection{Interrupciones básicas}
+\subsection{Excepciones}
+\label{subsec:excepciones}
 En esta sección explicaremos como realizamos la creación de la \textit{Interrupt Descriptors Table} (IDT) y su posterior carga en el \textit{kernel}.
 
 \subsubsection{Inicialización de la IDT}
@@ -215,6 +216,36 @@ kernel.
 	mov cr0, eax
 	\end{lstlisting}
 \end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Interrupciones externas}
+
+En la sección \ref{subsec:excepciones}, cargamos las entradas de la IDT y generamos las rutinas de atención correspondientes a las excepciones internas del procesador. A continuación, haremos lo propio para las tres interrupciones externas que podrá recibir nuestro sistema: el reloj, el teclado, y una rutina encargada de proveer los servicios del sistema. Las dos primeras serán requeridas por el PIC, mientras que la última será para uso  del usuario.
+
+Dado que por defecto el mapeado del PIC entra en conflicto con las excepciones del procesador de la 8 a la 15, es necesario hacer previamente un remapeo. Para eso, la cátedra ya proporciona la función \texttt{resetear\_pic} que se encarga de remapear las \textit{interrupt's requests} (IRQs) de reloj y de teclado a las interrupciones 32 (0x20) y 33 (0x21) respectivamente. Basta entonces llamar a esta función desde el kernel y luego reactivar el PIC con la función \texttt{habilitar\_pic}, también provista por la cátedra.
+
+La interrupción para solicitar servicios del sistema será la 0x46.
+
+Las entradas de la IDT se agregarán, al igual que antes, con el macro \texttt{IDT\_ENTRY}. Las de reloj y teclado tendrán DPL de kernel (0), mientras que para la 0x46 será de usuario (3).
+
+A continuación explicamos que es lo que hace cada una de las rutinas de atención.
+
+	\subsubsection{Reloj}
+	Esencialmente, el código de esta rutina es el mismo que el sugerido en la clase práctica de scheduler. La única diferencia real es que se agregan algunas líneas usadas por el modo debug.
+
+	Como primer paso, tras salvaguardar todos los registros para mantener la transparencia de la interrupción, llamamos a la función \texttt{fin\_intr\_pic1} que se encarga de avisarle al PIC que el IRQ del reloj ya ha sido atendido, y por lo tanto el PIC nuevamente está disponible para recibir IRQs. 
+
+	A continuación se llama a la función \texttt{sched\_atender\_tick} la cual se encargará de actualizar todo lo que sea necesario respecto del juego: posición del perro que está corriendo actualmente; removerlo del scheduler en caso de que deje de estar libre, ya sea porque volvió a la cucha y descargó todos sus huesos, o bien porque provocó una excepción; y finalmente setear la siguiente tarea a ejecutar, devolviendo el índice de su TSS en la GDT como output.
+
+	Como dicho output se recibe por el registro ax, se lo compara contra cx (al que previamente le cargamos el valor actual del \textit{task register} con \texttt{str}) y en caso de ser iguales simplemente se sigue ejecutando la misma tarea. Caso contrario debe realizarse el \textit{task switching}, haciendo un jump far con el selector de segmento correspondiente al tss de la siguiente tarea.
+
+	Finalmente, restauramos los registros con los valores que tenían antes de la interrupción.
+
+	\subsubsection{Teclado}
+
+	\subsubsection{Servicios del sistema}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Tareas}
 
