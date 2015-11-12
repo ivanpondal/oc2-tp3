@@ -528,11 +528,134 @@ Como cosas que valen la pena resaltar podemos ver que para conseguir una pila de
 \subsubsection{La Interrupción 0x46}
 En nuestro sistema operativo la interrupción 0x46 es la rutina de atención de servicios, es ejecutada por los jugadores para decidir las acciones de los perros. Estas pueden variar entre  \textit{game\_perro\_mover}, \textit{game\_perro\_cavar}, \textit{game\_perro\_olfatear} y \textit{game\_perro\_recibir\_orden} todos estos métodos estan definidos en \textit{perro.c} por la catedra. Una vez hecha la acción si todavia el quantum no se acabo se llama a la tarea idle para que esta espere hasta el turno del siguiente jugador.
 
-
 \subsection{Scheduler}
-Aquí hablaremos de como manejamos las tareas en nuestro sistema.
+El scheduler cumple un rol fundamental ya que es el encargado de permitir que
+nuestro sistema sea multitarea, otrogándole a cada una un tiempo determinado
+para que corran en el mismo. Para nuestro juego contamos con un máximo de 17
+tareas donde tenemos 16 para los perros y una para la tarea idle.
 
-\subsubsection{Modo Debug}
+Cada jugador puede tener hasta 8 tareas perros corriendo en simultáneo, con lo
+cual todas las decisiones tomadas para la elaboración del manejo de tareas fue
+teniendo en consideración esta cota.
+
+\subsubsection{Rutina para ejecutar siguiente tarea}
+
+Esta es quizás la rutina más importante de esta sección, ya que es la que decide
+qué tarea viene después de la actual. Para esto antes procedemos a explicar las
+estructuras que nos permiten llevar a cabo esta operación.
+
+Por un lado tenemos la estructura \texttt{sched\_task\_t} que posée los campos
+\texttt{perro} y \texttt{gdt\_index}. Esta estructura contendrá para cada tarea
+presente en el scheduler su perro asociado y el offset en la gdt que apunta a su
+TSS correspondiente. A su vez tenemos \texttt{sched\_t} compuesto por un arreglo \texttt{tasks} de 17
+\texttt{sched\_task\_t} y un entero \texttt{current} conteniendo el índice de la
+tarea actual.
+
+Ahora, la última posición del arreglo \texttt{tasks} está ocupada por la tarea
+idle, que contendrá su offset en la gdt correspondiente pero la variable
+\texttt{perro} estará en NULL. Con el resto de las posiciones, $(0, \dots, 15)$,
+tendremos que las pares corresponderán al jugador A y las impares al jugador B.
+
+De esta manera, la rutina que busca la siguiente tarea se comporta de la
+siguiente manera:
+
+\begin{enumerate}
+	\item Incializamos variables.
+	\begin{lstlisting}
+	encontre_proximo = FALSE
+	i = scheduler.current
+	tarea_actual = scheduler.tasks[i]
+	tarea_siguiente = NULL
+	\end{lstlisting}
+
+	\item Ciclamos dentro del arreglo \texttt{tasks}.
+	\begin{lstlisting}
+	Mientras no encontre_proximo
+	\end{lstlisting}
+	\begin{enumerate}
+		\item Incremento mi variable i teniendo en cuenta que puede darle la
+			vuelta al arreglo y cargo la posible tarea siguiente.
+	\begin{lstlisting}
+		i = (i + 1) MODULO 17
+		tarea_siguiente = scheduler.tasks[i]
+	\end{lstlisting}
+		\item Considero el caso en que haya recorrido todo el arreglo hasta
+			volver a la posición de la tarea actual.
+	\begin{lstlisting}
+		Si i == scheduler.current
+			Si tarea_actual.gdt_index == NULL // Tarea muerta o idle
+				i = 17 // Mando a la tarea idle
+			Fin Si
+			encontre_proximo = TRUE
+	\end{lstlisting}
+		\item Y ahora para el caso en que no di toda la vuelta.
+	\begin{lstlisting}
+		Si no
+			Si tarea_siguiente.gdt_index != NULL AND
+					tarea_siguiente.perro != NULL
+				encontre_proximo = TRUE
+			Fin Si
+		Fin Si
+	Fin Mientras
+	\end{lstlisting}
+	\end{enumerate}
+	\item Devolvemos el índice de la próxima tarea a ejecutar.
+	\begin{lstlisting}
+	Devuelvo i
+	\end{lstlisting}
+\end{enumerate}
+
+\subsubsection{Rutinas para agregar y remover tareas}
+
+Teniendo lo visto en la entrada anterior, las rutinas para agregar y remover
+tareas son bastante simples.
+
+\subsubsection*{Agregar tarea}
+
+Para agregar una tarea, el scheduler busca un slot libre dentro del arreglo
+\texttt{tasks} que le pertenezca al jugador dueño de la tarea (Si es el jugador
+A un slot par, si es el B, uno impar). Para esto se recorren las posiciones
+válidas para el jugador designado hasta encontra una cuyo \texttt{gdt\_index}
+sea NULL, que va a suceder cuando este slot pueda utilizarse.
+
+A continuación lo único que se realiza es en esa posición asignar el offset de
+la gdt de la tarea a ejecutar y el perro correspondiente.
+
+\subsubsection*{Remover tarea}
+
+Para remover una tarea, dado como parámetro el \texttt{gdt\_index} se busca en
+el arreglo \texttt{tasks} su tarea asociada y luego se setean tanto su offset en
+la gdt como el perro en NULL.
+
+\subsubsection{Rutina para atender un tick}
+
+Esta rutina también tiene mucha importancia ya que es la que se llama en cada
+tick de reloj, donde debe cambiar la tarea actual por la siguiente a ejecutar.
+
+\begin{enumerate}
+	\item Comenzaremos por llamar a la rutina que se encarga de actualizar
+		parámetros del juego.
+	\begin{lstlisting}
+	game_atender_tick(game_perro_actual)
+	\end{lstlisting}
+	\item Procedemos viendo si es necesario remover la tarea actual
+	\begin{lstlisting}
+	Si game_perro_actual != NULL AND game_perro_actual->libre == TRUE
+		sched_remover_tarea(scheduler.tasks[scheduler.current].gdt_index)
+	\end{lstlisting}
+	\item Buscamos la tarea a ejecutar y actualizamos la tarea y perro actuales
+	\begin{lstlisting}
+	scheduler.current = sched_proximo_a_ejecutar
+	game_perro_actual = scheduler.tasks[scheduler.current].perro
+	\end{lstlisting}
+	\item Finalmente devolvemos el offset en la gdt para que se realice el salto
+		a la tarea.
+	\begin{lstlisting}
+	Devolver scheculer.tasks[scheduler.current].gdt_index
+	\end{lstlisting}
+\end{enumerate}
+
+\subsection{Modo Debug}
 
 Para armar el \textit{Modo Debug} tuvimos que alterar un poco el funcionamiento de las rutinas de atención. Esto esta detallado en la sección de interrupciones pero contaremos aquí lo relevante de las interrupciones para el funcionamiento del modo debug. La rutina del teclado, al llamar a \textit{game\_atender\_teclado} reconoce la letra \textit{y}, la cual al ser presionada llama a \textit{game\_jugador\_debug}, es importante notar que si la pantalla del \textit{Modo Debug} esta activada ningún jugador deberia poder realizar algún tipo de acción para esto se agrego un condicional a \textit{game\_atender\_teclado}. El método al cual se llama al presionar la letra \textit{y} esta descrito en \textit{game.c}.
 
