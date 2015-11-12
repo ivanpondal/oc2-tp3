@@ -87,12 +87,12 @@ Hay un segmento mas que seteamos con el único objetivo de verificar el buen fun
 
 \subsection{Excepciones}
 \label{subsec:excepciones}
-En esta sección explicaremos como realizamos la creación de la \textit{Interrupt Descriptors Table} (IDT) y su posterior carga en el \textit{kernel}.
+En esta sección explicaremos como realizamos la creación de la \textit{Interrupt Descriptors Table} (IDT) y su posterior carga en el \textit{kernel}, así como también en qué consisten las rutinas de atención.
 
 \subsubsection{Inicialización de la IDT}
 La IDT es un arreglo de tamaño 255 de \texttt{idt\_entry}, la cual posee los campos a setear de una \textit{interrupt gate}. Como en este apartado solo nos interesa asociar las excepciones internas del procesador, únicamente generamos las primeras 20 entradas de la tabla, siguiendo la tabla 6-1 del tercer volumen del manual de Intel \footnote{Intel 64 and IA-32 Architectures Software Developer's Manual, Volume 3: System programming guide, Chapter 6}. Para inicializarla, utilizamos la función \texttt{idt\_inicializar} definida en \texttt{idt.c}, y cuya implementación se basa en llamar 20 veces al macro \texttt{IDT\_ENTRY}, definido en el mismo archivo, con los respectivos números de la excepción y el privilegio del descriptor (que en este caso querremos que sea siempre 0, pues es el \textit{kernel} quien manejará estas excepciones).
 
-La principal tarea de esta sección es, entonces, configurar correctamente la macro \texttt{IDT\_ENTRY}. También tendremos definidas 20 rutinas de atención para cada excepción, aunque de momento lo único que harán es mover el número de la excepción a \texttt{eax} y detener la ejecución del sistema. En el futuro, la rutina se encargará de desalojar la tarea que produjo la excepción y continuar con la ejecución.
+La principal tarea de esta sección es, entonces, configurar correctamente la macro \texttt{IDT\_ENTRY}. También tendremos definidas 20 rutinas de atención para cada excepción, que en \ref{subsubsection:rutinas-excepciones} explicaremos detalladamente.
 En la figura (\ref{fig:interrupt-gate}) mostramos como seteamos la entrada de la IDT correspondiente a la excepción $n$ del procesador.
 \vspace{1em}
 
@@ -122,6 +122,13 @@ Para cargar el descriptor de la IDT (compuesto por su posición base y su tamañ
 \begin{lstlisting}
 	lidt [IDT_DESC]
 \end{lstlisting}
+
+\subsubsection{Rutina de atención de las excepciones}
+\label{subsubsection:rutinas-excepciones}
+La rutina de atención de cada una de las 20 excepciones (que esencialmente resultan iguales) se encargan de desalojar a la tarea perro que produjo la excepción \footnote{Más precisamente lo marca como libre y luego en la siguiente interrupción de reloj se desaloja efectivamente del scheduler, a menos que se estuviera en modo de debug. En el último caso se desalorá luego de salir de dicho modo.} y saltar a la tarea idle (cuyo selector de tss es el 0x70), hasta que acabe el \emph{quantum}. Esta funcionalidad se implementa en las últimas líneas de la rutina.
+
+Al entrar, lo primero que se hace es verificar si se está en modo de debug o no. De no estarlo, simplemente se salta al final y se procede de la forma descripta arriba. Caso contrario, se guardan, en la estructura \texttt{debug\_info},  los valores de todos los registros y flags de la tarea al momento de producirse la excepción. Es importante notar que al estar en la rutina de atención los valores de eip, esp, ss, cs y los flags, son del kernel y no de la tarea. No obstante como los mismos están guardados en la pila podemos recuperarlos de ahí. Luego llamamos a la función \texttt{screen\_pantalla\_debug} que se encarga de setear \texttt{debug\_screen\_on} e imprimir la pantalla correspondiente. Finalmente, se continua con la rutina de desalojo normal y se salta a idle.
+
 
 \subsection{Paginación básica}
 
