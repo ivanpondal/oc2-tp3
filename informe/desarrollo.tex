@@ -105,13 +105,12 @@ registro \texttt{cr3}, la dirección \texttt{física} y por último los atributo
 	base_directorio_tablas = 0xFFFFF000 AND cr3
 	\end{lstlisting}
 
-	\item Calculamos el offset dentro del directorio de tablas en base a
-	\texttt{virtual}.
+	\item Calculamos el offset dentro del directorio de tablas en base a \texttt{virtual}.
 	\begin{lstlisting}
 	offset_directorio_tablas = ((0xFFC00000 AND virtual) >> 22) << 2
 	\end{lstlisting}
 
-	\item Obtenemos el Page Directory Entry correspondiente.
+	\item Obtenemos el Page Directory Entry correspondiente.\label{mapping_step3}
 	\begin{lstlisting}
 	pde = *(base_directorio_tablas + offset_directorio_tablas)
 	\end{lstlisting}
@@ -217,7 +216,93 @@ kernel.
 	\end{lstlisting}
 \end{enumerate}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Paginación dinámica}
+
+Procedemos a explicar la segunda parte de lo que es la paginación en el sistema.
+Con paginación dinámica lo que realizamos es un administrador básico de la
+memoria libre y generamos la rutina que se encarga de construirle el mapeo de
+memoria a una tarea perro.
+
+\subsubsection{Adminsitrador de memoria libre}
+
+Para adminsitrar la memoria libre del sistema, necesaria para inicializar
+las diversas estructuras del mismo, lo que realizamos es un simple contador que
+comienza en la dirección \texttt{0x102000}.
+
+Su funcionamiento es el siguiente, cuando el sistema necesita memoria, pide la
+siguiente página libre que corresponde al valor actual del contador y luego a
+este se lo incrementa en \texttt{0x1000}, que es el tamaño de una página.
+
+\subsubsection{Modificaciones en rutina de mapeado}
+
+Dado que ahora tenemos la posibilidad de utilizar memoria dinámica, nuestra
+rutina de mapeado debió ser actualizada para la eventualidad en que se quisiera
+mapear una dirección que no se encontrase en nuestro directorio de tablas.
+
+Luego del paso \ref{mapping_step3} de la rutina de mapeo, realizamos las siguientes
+operaciones:
+
+	\begin{lstlisting}
+	Si pde AND 0x1 == 0 // Si no esta presente
+		nueva_pagina_memoria = mmu_proxima_pagina_fisica_libre
+		inicializamos la pagina (la llenamos de cero)
+		*ptr_pde = nueva_pagina_memoria
+	Fin si
+
+	*ptr_pde = *ptr_pde OR attrs_pde // Seteamos sus atributos
+	pde = *ptr_pde // Cargamos nuestro page directory entry
+	\end{lstlisting}
+
+\subsubsection{Inicialización de memoria para tarea perro}
+
+Para crear el mapa de memoria de una tarea perro debemos tener en consideración
+varias cuestiones:
+
+\begin{enumerate}
+	\item Debe tener su propio directorio de tablas y a su vez tablas de
+		páginas.
+	\item Debe realizar identity mapping con permisos restringidos al
+		kernel.
+	\item Deberá tener su código copiado a la dirección física que corresponde a
+		su posición en el mapa del juego en modo de sólo lectura.
+	\item Tendrá la dirección \texttt{0x400000} mapeada en modo lectura/escritura a una página de memoria que compartirá
+		con los perros del mismo jugador (\texttt{0x100000} jugador A,
+		\texttt{0x101000} jugador B).
+	\item Tendrá la dirección \texttt{0x401000} mapeada en modo lectura/escritura que llevará a
+		la dirección física donde se encuentra su código.
+\end{enumerate}
+
+Es así entonces que para lograr esto realizamos la siguiente secuencia de pasos:
+
+\begin{enumerate}
+	\item Generamos nuestro nuevo directorio y realizamos identity mapping.
+	\begin{lstlisting}
+	base_directorio_tablas_perro = mmu_proxima_pagina_fisica_libre
+	base_directorio_paginas_perro = mmu_proxima_pagina_fisica_libre
+	incializamos ambas paginas (las llenamos de ceros)
+	incializamos el primer page directory entry asignandole la direccion del
+	directorio de paginas y atributos de kernel
+	realizamos identity mapping igual que con el mapa del kernel
+	\end{lstlisting}
+	\item Dependiendo del tipo de perro que se lanzó, mapeamos su código de la
+		dirección correspondiente.
+	\begin{lstlisting}
+	mapeamos direccion virtual del codigo en el mapa con la fisica
+	mapeamos direccion de codigo de tarea con la fisica correspondiente
+	\end{lstlisting}
+	\item Dependiendo del jugador, mapeamos la memoria compartida
+	\begin{lstlisting}
+	mapeamos la direccion virtual de memoria compartida con la fisica
+	correspondiente dependiendo del jugador
+	\end{lstlisting}
+	\item Copiamos el código a la dirección física donde está mapeado
+	\begin{lstlisting}
+	mapeamos direccion donde copiar el codigo en mapa de memoria actual
+	copiamos el codigo a la direccion mapeada
+	desmapeamos la direccion del mapa de memoria actual
+	\end{lstlisting}
+\end{enumerate}
+
 \subsection{Interrupciones externas}
 
 En la sección \ref{subsec:excepciones}, cargamos las entradas de la IDT y generamos las rutinas de atención correspondientes a las excepciones internas del procesador. A continuación, haremos lo propio para las tres interrupciones externas que podrá recibir nuestro sistema: el reloj, el teclado, y una rutina encargada de proveer los servicios del sistema. Las dos primeras serán requeridas por el PIC, mientras que la última será para uso  del usuario.
