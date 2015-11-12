@@ -6,6 +6,53 @@ Del código que viene dado se deben agregar en principio cinco segmentos (Para l
 
 Para esto seteamos cada segmento, a partir del indice 8 de la gdt por restricciones del trabajo práctico. Las posiciones anteriores a la 8 quedan en 0. Los cuatro primeros segmentos direccionan los primeros 500 MB de memoria, desde la posición 0 hasta el megabyte número 500, en ese espacio entran 128.000 (0x1F400) bloques de 4 KB por lo tanto el limite sera 0x1F3FF ya que contamos desde el 0, los de codigo son del tipo 10 (0x0A) y los de datos del tipo (0x01), el limite es (0xF3FF) y el nivel de privilegio 0 o 3 segun corresponda. La granularidad esta activada (0x01). Los bits P, L, D/B y AVL se ponen en 1, 0, 1 y 0 respectivamente para todas las entradas.
 
+
+
+Al crear la parte de tareas del sistema tuvimos que agregar 18 segmentos nuevos a la GDT, estos seran los correspondientes a las TSS's de tarea\_inicial, IDLE, los 8 perros posibles que puede tener el jugador A simultaneamente y lo mismo para el jugador B (Hablaremos mas de esto en la parte de tareas del informe). Estos segmentos van del numero 13 al 30
+
+Para configurar estos segmentos de la gdt se pone como base el 0, esto será luego seteado correctamente por la función \textit{tss\_inicializar} la cual pone la dirección de la ubicación de la tss correspondiente, cada segmento tendrá como limite 104 Bytes (0x0067) para que la GDT interprete eso como bytes ponemos la granularidad en 0. El nivel de privilegio para las tareas de los jugadores será de 3. Las tareas que serán manejadas unicamente por el sistema, \textit{tarea\_inicial} y IDLE tendran el DPL en 0. El bit de present va en 1 para todos los segmentos y todo lo demás quedara en 0. 
+
+El funcionamiento de \textit{tss\_inicializar} es muy simple, hay 4 variables globales en \textit{tss.c} las cuales son tss\_inicial, tss\_idle, tss\_jugadorA y tss\_jugadorB, los segmentos deberian tener como base estas direcciones por lo que el objetivo de esta función es setearlos correctamente, para eso utilizamos un macro definido en \textit{tss.h} llamado TSS\_PERRO\_ENTRY el cual basicamente reconoce a partir de sus parametros que entrada de la gdt se desea setear y luego se pone como base la dirección del perro correspondiente segun a cual jugador corresponda.
+
+\begin{lstlisting}
+
+void tss_inicializar() {
+	gdt[GDT_ID13_TSS_INICIAL_DESC].base_0_15 = 
+	(unsigned short)((uint)&tss_inicial & 0xFFFF);
+	gdt[GDT_ID13_TSS_INICIAL_DESC].base_23_16 = 
+	(unsigned char)(((uint)&tss_inicial >> 16) & 0xFF);
+	gdt[GDT_ID13_TSS_INICIAL_DESC].base_31_24 = 
+	(unsigned char)(((uint)&tss_inicial >> 24) & 0xFF);
+
+	gdt[GDT_ID14_TSS_IDLE_DESC].base_0_15 = 
+	(unsigned short)((uint)&tss_idle & 0xFFFF);
+	gdt[GDT_ID14_TSS_IDLE_DESC].base_23_16 = 
+	(unsigned char)(((uint)&tss_idle >> 16) & 0xFF);
+	gdt[GDT_ID14_TSS_IDLE_DESC].base_31_24 = 
+	(unsigned char)(((uint)&tss_idle >> 24) & 0xFF);
+
+	TSS_PERRO_ENTRY(15, A, 0);
+	TSS_PERRO_ENTRY(16, A, 1);
+	TSS_PERRO_ENTRY(17, A, 2);
+	TSS_PERRO_ENTRY(18, A, 3);
+	TSS_PERRO_ENTRY(19, A, 4);
+	TSS_PERRO_ENTRY(20, A, 5);
+	TSS_PERRO_ENTRY(21, A, 6);
+	TSS_PERRO_ENTRY(22, A, 7);
+
+	TSS_PERRO_ENTRY(23, B, 0);
+	TSS_PERRO_ENTRY(24, B, 1);
+	TSS_PERRO_ENTRY(25, B, 2);
+	TSS_PERRO_ENTRY(26, B, 3);
+	TSS_PERRO_ENTRY(27, B, 4);
+	TSS_PERRO_ENTRY(28, B, 5);
+	TSS_PERRO_ENTRY(29, B, 6);
+	TSS_PERRO_ENTRY(30, B, 7);
+
+}
+
+\end{lstlisting}
+
 \subsubsection{Pasaje a modo protegido}
 
 Antes de pasar a modo protegido el sistema operativo necesita saber donde esta la gdt y cual es su tamaño para esto cargamos a traves de lgdt el registro gdtr el cual tiene esta información. También habilitamos A20 para permitir el acceso a direcciones superiores a $2^{20}$ bits.
@@ -348,18 +395,62 @@ A continuación explicamos que es lo que hace cada una de las rutinas de atenci�
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 \subsection{Tareas}
+Para poder manejar las tareas de forma dinámica, permitiendo que el procesador pase de una a otra sin perder el contexto de trabajo que tenía la tarea anterior es que se utilizan las TSS (\textit{task state segment}. En esta sección explicaremos brevemente como configuramos todo para su buen funcionamiento.
 
 \subsubsection{Entradas de la GDT}
+Cada TSS, tiene un descriptor que se declara en la gdt, esto fue explicado previamente en la sección correspondiente. Veamos un poco que papel tendrá cada uno de esos segmentos. La tarea inicial, será creada para tener algo a lo que saltar al ir a la primer tarea, es necesaria ya que el procesador siempre intentara guardar el contexto de las tareas si al arrancar no hay nada las cosas irán mal. La TSS de esta tarea puede ser llenada de la forma que sea ya que no vamos a prestar atención a su contexto, la descartaremos tan pronto sigamos con una nueva tarea.
+Por otro lado teniamos la TSS de la tarea IDLE, esta será fundamental para cubrir los huecos de tiempo en los que el sistema no tenga nada que hacer.
 
-Al llegar a esta parte del trabajo tuvimos que agregar 18 entradas nuevas a la GDT, estas describen las TSS's de tarea\_inicial, IDLE, los 8 perros posibles que puede tener el jugador A simultaneamente y lo mismo para el jugador B. Estos segmentos van del numero 13 al 30
+Dicho esto pasemos a ver como se inicializa \textit{tss\_inicializar\_idle}
 
-Para configurar las entradas de la gdt se pone como base el 0, esto será luego seteado correctamente por \textit{tss\_inicializar} la cual pone la dirección de la ubicación de la tss correspondiente, cada segmento tendrá como limite 104 Bytes (0x0067) para que la GDT interprete eso como bytes ponemos la granularidad en 0. El nivel de privilegio para las tareas de los jugadores será de 3. Las tareas que serán manejadas unicamente por el sistema, \textit{tarea\_inicial} y IDLE tendran el DPL en 0. El bit de present va en 1 para todos los segmentos y todo lo demás quedara en 0.
 
-\subsubsection{Inicialización de las TSS}
-Para completar las TSS's esta la función \textbf{tss\_inicializar}, esta como se dijo previamente pone la base correcta a los 18 segmentos descriptores de TSS's. En el codigo se puede ver el macro TSS\_PERRO\_ENTRY el cual esta definido en \textit{tss.h} y realiza dicha operación de seteo de base para los segmentos de los perros.
+\begin{lstlisting}
 
-Para la configuración de las opciones de la TSS IDLE pusimos la dirección de la pila en el mismo lugar que la del kernel (0x27000), aunque las pilas de menores privilegios, esp1 y esp2 estan en 0, cr3 vale igual que el cr3 del kernel, iomap vale 0xFFFF, y los selectores de segmentos se pusieronsegun correspondian. En eip ponemos la dirección de la tarea la cual se aclara en la consigna que es la 0x16000.
+void tss_inicializar_idle() {
+	tss_idle.ptl = 0;
+    tss_idle.unused0 = 0;
+    tss_idle.esp0 = 0x27000;
+    tss_idle.ss0 = 0x50;
+    tss_idle.unused1 = 0;
+    tss_idle.esp1 = 0;
+    tss_idle.ss1 = 0;
+    tss_idle.unused2 = 0;
+    tss_idle.esp2 = 0;
+    tss_idle.ss2 = 0;
+    tss_idle.unused3 = 0;
+    tss_idle.cr3 = 0x27000;
+    tss_idle.eip = 0x16000;
+    tss_idle.eflags = 0x00000202;
+    tss_idle.eax = 0;
+    tss_idle.ecx = 0;
+    tss_idle.edx = 0;
+    tss_idle.ebx = 0;
+    tss_idle.esp = 0x27000;
+    tss_idle.ebp = 0x27000;
+    tss_idle.esi = 0;
+    tss_idle.edi = 0;
+    tss_idle.es = 0x50;
+    tss_idle.unused4 = 0;
+    tss_idle.cs = 0x40;
+    tss_idle.unused5 = 0;
+    tss_idle.ss = 0x50;
+    tss_idle.unused6 = 0;
+    tss_idle.ds = 0x50;
+    tss_idle.unused7 = 0;
+    tss_idle.fs = 0x50;
+    tss_idle.unused8 = 0;
+    tss_idle.gs = 0x50;
+    tss_idle.unused9 = 0;
+    tss_idle.ldt = 0;
+    tss_idle.unused10 = 0;
+    tss_idle.dtrap = 0;
+    tss_idle.iomap = 0xFFFF;
+}
+\end{lstlisting}
+
+Para la configuración de las opciones de la TSS IDLE pusimos la dirección de la pila en el mismo lugar que la del kernel (0x27000), aunque las pilas de menores privilegios, esp1 y esp2 estan en 0, cr3 vale igual que el cr3 del kernel, iomap vale 0xFFFF, y los selectores de segmentos se pusieron segun correspondian. En eip ponemos la dirección de la tarea la cual se aclara en la consigna que es la 0x16000.
 
 Una vez que esta todo configurado, inicializamos las tss y cargamos la tarea inicial en kernel.asm
 
@@ -371,6 +462,119 @@ Una vez que esta todo configurado, inicializamos las tss y cargamos la tarea ini
 
 \subsubsection{Construcción de Tareas}
 
+Para la construcción de la tss de los perros de manera similar que lo que hicimos con tss\_idle creamos la siguiente función.
+
+\begin{lstlisting}
+
+void tss_construir_tarea(perro_t *perro, int index_jugador, int index_tipo){
+	uint cr3 = mmu_inicializar_memoria_perro(perro, index_jugador, index_tipo);
+	uint ebp = CODIGO_BASE + 0xFFF;
+	uint esp = ebp - 12;
+
+	tss* ptr_tss = (index_jugador == JUGADOR_A) ?
+	 &tss_jugadorA[perro->index] : 
+	 &tss_jugadorB[perro->index];
+
+	uint pila_nivel_0 = mmu_proxima_pagina_fisica_libre() + 0xFFF;
+
+	ptr_tss->ptl = 0;
+	ptr_tss->unused0 = 0;
+	ptr_tss->esp0 = pila_nivel_0;
+	ptr_tss->ss0 = 0x50;
+	ptr_tss->unused1 = 0;
+	ptr_tss->esp1 = 0;
+	ptr_tss->ss1 = 0;
+	ptr_tss->unused2 = 0;
+	ptr_tss->esp2 = 0;
+	ptr_tss->ss2 = 0;
+	ptr_tss->unused3 = 0;
+	ptr_tss->cr3 = cr3;
+	ptr_tss->eip = CODIGO_BASE;
+	ptr_tss->eflags = 0x00000202;
+	ptr_tss->eax = 0;
+	ptr_tss->ecx = 0;
+	ptr_tss->edx = 0;
+	ptr_tss->ebx = 0;
+	ptr_tss->esp = esp;
+	ptr_tss->ebp = ebp;
+	ptr_tss->esi = 0;
+	ptr_tss->edi = 0;
+	ptr_tss->es = 0x5B;
+	ptr_tss->unused4 = 0;
+	ptr_tss->cs = 0x4B;
+	ptr_tss->unused5 = 0;
+	ptr_tss->ss = 0x5B;
+	ptr_tss->unused6 = 0;
+	ptr_tss->ds = 0x5B;
+	ptr_tss->unused7 = 0;
+	ptr_tss->fs = 0x5B;
+	ptr_tss->unused8 = 0;
+	ptr_tss->gs = 0x5B;
+	ptr_tss->unused9 = 0;
+	ptr_tss->ldt = 0;
+	ptr_tss->unused10 = 0;
+	ptr_tss->dtrap = 0;
+	ptr_tss->iomap = 0xFFFF;
+}
+\end{lstlisting}
+
+Como cosas que valen la pena resaltar podemos ver que para conseguir una pila de nivel 0 nueva debemos pedir una nueva página utilizando la función explicada en la sección anterior y setear el inicio de la fila al final de dicha página; para esp debemos restar 12 al valor del inicio de la pila ya que están apilados los 2 argumentos de las tareas y la dirección de retorno.
 
 \subsubsection{La Interrupción 0x46}
 En nuestro sistema operativo la interrupción 0x46 es la rutina de atención de servicios, es ejecutada por los jugadores para decidir las acciones de los perros. Estas pueden variar entre  \textit{game\_perro\_mover}, \textit{game\_perro\_cavar}, \textit{game\_perro\_olfatear} y \textit{game\_perro\_recibir\_orden} todos estos métodos estan definidos en \textit{perro.c} por la catedra. Una vez hecha la acción si todavia el quantum no se acabo se llama a la tarea idle para que esta espere hasta el turno del siguiente jugador.
+
+
+\subsection{Scheduler}
+Aquí hablaremos de como manejamos las tareas en nuestro sistema.
+
+\subsubsection{Modo Debug}
+
+Para armar el \textit{Modo Debug} tuvimos que alterar un poco el funcionamiento de las rutinas de atención. Esto esta detallado en la sección de interrupciones pero contaremos aquí lo relevante de las interrupciones para el funcionamiento del modo debug. La rutina del teclado, al llamar a \textit{game\_atender\_teclado} reconoce la letra \textit{y}, la cual al ser presionada llama a \textit{game\_jugador\_debug}, es importante notar que si la pantalla del \textit{Modo Debug} esta activada ningún jugador deberia poder realizar algún tipo de acción para esto se agrego un condicional a \textit{game\_atender\_teclado}. El método al cual se llama al presionar la letra \textit{y} esta descrito en \textit{game.c}.
+
+\begin{lstlisting}
+
+
+void game_jugador_debug(){
+		if(debug_screen_on == TRUE){
+			debug_screen_on = FALSE;
+			screen_restore_backup();
+		}
+		else{
+			if(debug_on == FALSE){
+				debug_on = TRUE;
+				print("MODO DEBUG ACTIVADO", 55, 0, 0x0f0f);
+			}
+			else{
+				debug_on = FALSE;
+				screen_pintar_rect(0, 0x00, 0, 53, 1, 23);
+			}
+		}
+}
+
+\end{lstlisting}
+
+La función utiliza dos variables globales, \textit{debug\_on} y \textit{debug\_screen\_on}, la primera indica si el modo debug esta encendido, la segunda si la pantalla del modo debug esta activada. En el caso de que \textit{debug\_screen\_on} valga 0 lo único que se hace es imprimir en pantalla que el modo debug esta activado cuando corresponda y cambiar el valor de \textit{debug\_on}. En el caso de que la pantalla este activada esta se apaga con el método definido en \textit{screen.h}, \textit{screen\_restore\_backup}. Una vez hecha la parte del teclado pasamos a lo que va a hacer la rutina de atención de excepciones. Lo primero que hacemos es ver si estamos en modo debug, si no estamos matamos a la tarea directamente, pero si estamos como primer paso debemos utilizar la estructura llamada \textit{debug\_info} la cual nos servira de soporte para almacenar todo el contexto en el que se generó la excepción, una vez hecho eso generamos la pantalla del modo debug para que muestre el contexto en el que se genero el problema, una vez hecho esto ya podemos matar a la tarea y saltar a la tarea idle.
+
+\begin{lstlisting}
+	_isr%1:
+	cmp dword [debug_on], 0
+	je .matarTarea
+		
+	;....
+	;guardado del contexto en debug:info	
+	;....	
+
+	call screen_pantalla_debug
+
+	.matarTarea:
+	push dword [game_perro_actual]
+	call game_perro_termino
+	pop ax
+	;Salto a la tarea idle
+	jmp 0x70:0
+
+\end{lstlisting}
+
+Una vez hecho esto se mantendra todo el sistema estático hasta que debido a una interrupción del teclado se cambie el valor de \textit{debug\_on}, esto será debido a que la rutina de atencion del reloj si detecta que \textit{debug\_screen\_on} vale 1 no hace nada.
+
+Una vez que se vuelve a presionar la letra \textit{y} \textit{game\_jugador\_debug} restaura la pantalla, pone \textit{debug\_screen\_on} en FALSE y \textit{debug\_on} se mantiene en TRUE para mantener al sistema en \textit{modo debug} como se indicaba en la consigna. Restaurandose todo esto el sistea continua normalmente el juego, al pasar un ciclo del reloj se continuara con la siguiente tarea que corresponda.
