@@ -31,7 +31,7 @@ TASKIDLE=idle.tsk
 TASKA1=taskA1.ctsk
 TASKA2=taskA2.ctsk
 TASKB1=taskB1.ctsk
-TASKB2=taskB2.ctsk
+TASKB2=taskB2.tsk
 
 TASKS=tareas.tsk
 
@@ -100,14 +100,25 @@ idle.tsk: idle.asm
 	rm $@.tmp
 	@echo ''
 
+taskB2.tsk: blackdog.asm
+	@echo 'Compilando tarea BLACKDOG...'
+	$(NASM) -fbin -o $@ $^
+	@echo ''
+	@echo 'Generando imagen de la tarea BLACKDOG...'
+	mv taskB2.tsk taskB2.tsk.tmp
+	dd if=/dev/zero bs=1 count=4K of=$@ status=noxfer > /dev/null 2>&1
+	dd if=$@.tmp bs=1 count=4K seek=0 conv=notrunc of=$@ status=noxfer > /dev/null 2>&1
+	rm $@.tmp
+	@echo ''
+
 taskA1.tsko: tareaA1.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 taskA2.tsko: tareaA2.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 taskB1.tsko: tareaB1.c
 	$(CC) $(CFLAGS) -c -o $@ $^
-taskB2.tsko: tareaB2.c
-	$(CC) $(CFLAGS) -c -o $@ $^
+#taskB2.tsko: tareaB2.c
+#	$(CC) $(CFLAGS) -c -o $@ $^
 
 %.ctsk: %.tsko
 	@echo 'Linkeando tarea...'
