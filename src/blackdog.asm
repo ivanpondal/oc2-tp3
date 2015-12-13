@@ -31,14 +31,14 @@ main:
 	jmp 0x400700
 	times 1024 nop
 	.dogloop:
-		mov word eax, 4
+		mov eax, 4
 		int 0x46
 		mov ebx, eax
 		and ebx, 0xFFFF0000
 		shr ebx, 16	; ebx = número de orden
 
 		cmp ebx, 1
-		jne .dogloop
+		jne .switch_dos_tres
 		; 1 - mover perro hacia jugador
 		xor ebx, ebx
 		mov bx, ax
@@ -52,15 +52,15 @@ main:
 			jb .move_left
 			.move_right:
 			; jugador_x > perro_x
-			mov word eax, 1
-			mov word ecx, 0xA
+			mov eax, 1
+			mov ecx, 0xA
 			int 0x46
 			inc di	; perro_x++
 			jmp .move_x
 			.move_left:
 			; jugador_x < perro_x
-			mov word eax, 1
-			mov word ecx, 0xD
+			mov eax, 1
+			mov ecx, 0xD
 			int 0x46
 			dec di	; perro_x--
 			jmp .move_x
@@ -69,18 +69,29 @@ main:
 				cmp ebx, edi	; jugador_y:jugador_x ? perro_y:perro_x
 				je .dogloop
 				jb .move_up
-				.move_down
+				.move_down:
 				; jugador_y:jugador_x > perro_y:perro_x
-				mov word eax, 1
-				mov word ecx, 0x7
+				mov eax, 1
+				mov ecx, 0x7
 				int 0x46
 				add edi, 0x10000
 				jmp .move_y
 				.move_up:
 				; jugador_y:jugador_x < perro_y:perro_x
-				mov word eax, 1
-				mov word ecx, 0x4
+				mov eax, 1
+				mov ecx, 0x4
 				int 0x46
 				sub edi, 0x10000
 				jmp .move_y
+		.switch_dos_tres:
+		cmp ebx, 2
+		jne .dogloop
+		; 2 - atacar
+		.atacar:
+			mov eax, 1
+			mov ecx, 0x4
+			int 0x46
+			mov eax, 1
+			mov ecx, 0x7
+			int 0x46
 		jmp .dogloop
