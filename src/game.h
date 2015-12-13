@@ -120,7 +120,7 @@ uint game_perro_olfatear(perro_t *perro);
 
 // recibe un perro, devueve la última orden que se dio por un jugador
 // *** viene del syscall recibir orden ***
-uint game_perro_recibir_orden(perro_t *perro, uint jugador_index);
+uint game_perro_recibir_orden(perro_t *perro);
 
 // chequea si el perro está en la cucha y suma punto al jugador o lo manda a dormir
 void game_perro_ver_si_en_cucha(perro_t *perro);

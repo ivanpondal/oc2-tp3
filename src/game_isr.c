@@ -32,7 +32,7 @@ uint game_syscall_manejar(uint syscall, uint param1)
 			ret = game_perro_olfatear(game_perro_actual);
 			break;
 		case 4:
-			ret = game_perro_recibir_orden(game_perro_actual, param1);
+			ret = game_perro_recibir_orden(game_perro_actual);
 			break;
 	}
     return ret;
