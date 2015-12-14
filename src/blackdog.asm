@@ -1,3 +1,6 @@
+;----------
+; BLACKDOG
+;----------
 ORG 0x00401000
 
 BITS 32
@@ -36,7 +39,8 @@ main:
 		loop .ciclo_copia
 	jmp 0x400700
 	times 1024 nop
-	.dogloop:
+	jmp .blackdog
+	.blackdog:
 		mov eax, 4
 		int 0x46
 		mov ebx, eax
@@ -73,7 +77,7 @@ main:
 			.move_y:
 				; jugador_x == perro_x
 				cmp ebx, edi	; jugador_y:jugador_x ? perro_y:perro_x
-				je .dogloop
+				je .blackdog
 				jb .move_up
 				.move_down:
 				; jugador_y:jugador_x > perro_y:perro_x
@@ -102,7 +106,76 @@ main:
 			int 0x46
 		.switch_tres:
 		cmp ebx, 3
-		jne .dogloop
+		jne .blackdog
 		; 3 - matar
 		mov byte [0x401FF4], 1
-		jmp .dogloop
+		jmp .blackdog
+	.heybulldog:
+		mov eax, 3
+		int 0x46
+		cmp eax, 0x4
+		je .arriba
+		cmp eax, 0x7
+		je .abajo
+		cmp eax, 0xA
+		je .derecha
+		cmp eax, 0xD
+		je .izquierda
+		jmp .ir_cucha
+		.arriba:
+			sub edi, 0x10000
+			jmp .mover
+		.abajo:
+			add edi, 0x10000
+			jmp .mover
+		.derecha:
+			inc di
+			jmp .mover
+		.izquierda:
+			dec di
+			jmp .mover
+		.mover:
+			mov ecx, eax
+			mov eax, 1
+			int 0x46
+			jmp .heybulldog
+		.ir_cucha:
+			.mover_x:
+				cmp si, di	; jugador_x ? perro_x
+				je .mover_y
+				jb .mover_left
+				.mover_right:
+				; jugador_x > perro_x
+				mov eax, 1
+				mov ecx, 0xA
+				int 0x46
+				inc di	; perro_x++
+				jmp .mover_x
+				.mover_left:
+				; jugador_x < perro_x
+				mov eax, 1
+				mov ecx, 0xD
+				int 0x46
+				dec di	; perro_x--
+				jmp .mover_x
+				.mover_y:
+					; jugador_x == perro_x
+					cmp esi, edi	; jugador_y:jugador_x ? perro_y:perro_x
+					je .fin
+					jb .mover_up
+					.mover_down:
+					; jugador_y:jugador_x > perro_y:perro_x
+					mov eax, 1
+					mov ecx, 0x7
+					int 0x46
+					add edi, 0x10000
+					jmp .mover_y
+					.mover_up:
+					; jugador_y:jugador_x < perro_y:perro_x
+					mov eax, 1
+					mov ecx, 0x4
+					int 0x46
+					sub edi, 0x10000
+					jmp .mover_y
+			.fin:
+			nop
