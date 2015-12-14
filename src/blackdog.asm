@@ -14,10 +14,16 @@ BITS 32
 main:
 	jmp .copiar_a_compartida
 	times 1024 nop
-	jmp $
+	cmp byte [0x401FF4], 1
+	je .matar
+	jmp $	; congelar tarea
+	.matar:
+	xor eax, eax
+	div eax
 	.copiar_a_compartida:
+	mov byte [0x401FF4], 0	; flag para matar o congelar
 	; guardo posición inicial cucha y perro
-	mov si, [esp]
+	mov si, [esp + 8]
 	shl esi, 16
 	mov si, [esp + 4]	; esi = cucha_y:cucha_x
 	mov edi, esi		; edi = perro_y:perro_x
@@ -85,7 +91,7 @@ main:
 				jmp .move_y
 		.switch_dos_tres:
 		cmp ebx, 2
-		jne .dogloop
+		jne .switch_tres
 		; 2 - atacar
 		.atacar:
 			mov eax, 1
@@ -94,4 +100,9 @@ main:
 			mov eax, 1
 			mov ecx, 0x7
 			int 0x46
+		.switch_tres:
+		cmp ebx, 3
+		jne .dogloop
+		; 3 - matar
+		mov byte [0x401FF4], 1
 		jmp .dogloop
