@@ -95,10 +95,7 @@ uint game_perro_mover(perro_t *perro, direccion dir)
 			uint direccion_nueva_fisica = mmu_xy2fisica(x_dest, y_dest);
 			uint cr3 = rcr3(); 
 			mmu_mapear_pagina_base(direccion_nueva_virtual, cr3, direccion_nueva_fisica, 0x5, 0x7);
-			uint direccion_codigo = (perro->jugador->index == JUGADOR_A) ?
-				CODIGO_A_BASE + PAGE_SIZE*perro->tipo : CODIGO_B_BASE + PAGE_SIZE*perro->tipo;
-
-			mmu_copiar_pagina(direccion_codigo, direccion_nueva_virtual);
+			mmu_copiar_pagina(CODIGO_BASE, direccion_nueva_virtual);
 			mmu_mapear_pagina_base(CODIGO_BASE, cr3, direccion_nueva_fisica, 0x7, 0x7);
 
 			screen_pintar_perro(perro);
