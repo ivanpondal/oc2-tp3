@@ -56,43 +56,43 @@ main:
 		and ax, 0x00FF
 		mov bx, ax
 		; ebx = jugador_y:jugador_x
-		.move_x:
+		.mover_x:
 			cmp bx, di	; jugador_x ? perro_x
-			je .move_y
-			jb .move_left
-			.move_right:
+			je .mover_y
+			jb .mover_izquierda
+			.mover_derecha:
 			; jugador_x > perro_x
 			mov eax, 1
 			mov ecx, 0xA
 			int 0x46
 			inc di	; perro_x++
-			jmp .move_x
-			.move_left:
+			jmp .mover_x
+			.mover_izquierda:
 			; jugador_x < perro_x
 			mov eax, 1
 			mov ecx, 0xD
 			int 0x46
 			dec di	; perro_x--
-			jmp .move_x
-			.move_y:
+			jmp .mover_x
+			.mover_y:
 				; jugador_x == perro_x
 				cmp ebx, edi	; jugador_y:jugador_x ? perro_y:perro_x
 				je .blackdog
-				jb .move_up
-				.move_down:
+				jb .mover_arriba
+				.mover_abajo:
 				; jugador_y:jugador_x > perro_y:perro_x
 				mov eax, 1
 				mov ecx, 0x7
 				int 0x46
 				add edi, 0x10000
-				jmp .move_y
-				.move_up:
+				jmp .mover_y
+				.mover_arriba:
 				; jugador_y:jugador_x < perro_y:perro_x
 				mov eax, 1
 				mov ecx, 0x4
 				int 0x46
 				sub edi, 0x10000
-				jmp .move_y
+				jmp .mover_y
 		.switch_dos_tres:
 		cmp ebx, 2
 		jne .switch_tres
@@ -114,68 +114,72 @@ main:
 		mov eax, 3
 		int 0x46
 		cmp eax, 0x4
-		je .arriba
+		je .ir_arriba
 		cmp eax, 0x7
-		je .abajo
+		je .ir_abajo
 		cmp eax, 0xA
-		je .derecha
+		je .ir_derecha
 		cmp eax, 0xD
-		je .izquierda
+		je .ir_izquierda
 		jmp .ir_cucha
-		.arriba:
+		.ir_arriba:
 			sub edi, 0x10000
-			jmp .mover
-		.abajo:
+			jmp .moverse
+		.ir_abajo:
 			add edi, 0x10000
-			jmp .mover
-		.derecha:
+			jmp .moverse
+		.ir_derecha:
 			inc di
-			jmp .mover
-		.izquierda:
+			jmp .moverse
+		.ir_izquierda:
 			dec di
-			jmp .mover
-		.mover:
+			jmp .moverse
+		.moverse:
 			mov ecx, eax
 			mov eax, 1
 			int 0x46
 			jmp .heybulldog
 		.ir_cucha:
-			.mover_x:
-				cmp si, di	; jugador_x ? perro_x
-				je .mover_y
-				jb .mover_left
-				.mover_right:
-				; jugador_x > perro_x
+			mov eax, 2
+			int 0x46
+			cmp eax, 0
+			jne .ir_cucha
+			.volver_x:
+				cmp si, di	; cucha_x ? perro_x
+				je .volver_y
+				jb .volver_izquierda
+				.volver_derecha:
+				; cucha_x > perro_x
 				mov eax, 1
 				mov ecx, 0xA
 				int 0x46
 				inc di	; perro_x++
-				jmp .mover_x
-				.mover_left:
-				; jugador_x < perro_x
+				jmp .volver_x
+				.volver_izquierda:
+				; cucha_x < perro_x
 				mov eax, 1
 				mov ecx, 0xD
 				int 0x46
 				dec di	; perro_x--
-				jmp .mover_x
-				.mover_y:
-					; jugador_x == perro_x
-					cmp esi, edi	; jugador_y:jugador_x ? perro_y:perro_x
+				jmp .volver_x
+				.volver_y:
+					; cucha_x == perro_x
+					cmp esi, edi	; cucha_y:cucha_x ? perro_y:perro_x
 					je .fin
-					jb .mover_up
-					.mover_down:
-					; jugador_y:jugador_x > perro_y:perro_x
+					jb .volver_arriba
+					.volver_abajo:
+					; cucha_y:cucha_x > perro_y:perro_x
 					mov eax, 1
 					mov ecx, 0x7
 					int 0x46
 					add edi, 0x10000
-					jmp .mover_y
-					.mover_up:
-					; jugador_y:jugador_x < perro_y:perro_x
+					jmp .volver_y
+					.volver_arriba:
+					; cucha_y:cucha_x < perro_y:perro_x
 					mov eax, 1
 					mov ecx, 0x4
 					int 0x46
 					sub edi, 0x10000
-					jmp .mover_y
+					jmp .volver_y
 			.fin:
-			nop
+			jmp $
