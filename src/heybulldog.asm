@@ -66,6 +66,8 @@ main:
 			mov eax, 1
 			mov ecx, 0xA
 			int 0x46
+			cmp eax, 0
+			je .blackdog
 			inc di	; perro_x++
 			jmp .mover_x
 			.mover_izquierda:
@@ -73,6 +75,8 @@ main:
 			mov eax, 1
 			mov ecx, 0xD
 			int 0x46
+			cmp eax, 0
+			je .blackdog
 			dec di	; perro_x--
 			jmp .mover_x
 			.mover_y:
@@ -85,6 +89,8 @@ main:
 				mov eax, 1
 				mov ecx, 0x7
 				int 0x46
+				cmp eax, 0
+				je .blackdog
 				add edi, 0x10000
 				jmp .mover_y
 				.mover_arriba:
@@ -92,6 +98,8 @@ main:
 				mov eax, 1
 				mov ecx, 0x4
 				int 0x46
+				cmp eax, 0
+				je .blackdog
 				sub edi, 0x10000
 				jmp .mover_y
 		.orden_dos_tres:
@@ -140,6 +148,8 @@ main:
 			mov ecx, eax
 			mov eax, 1
 			int 0x46
+			cmp eax, 0
+			je .suicidio
 			jmp .heybulldog
 		.ir_cucha:
 			mov eax, 2
@@ -155,6 +165,8 @@ main:
 				mov eax, 1
 				mov ecx, 0xA
 				int 0x46
+				cmp eax, 0
+				je .volver_x
 				inc di	; perro_x++
 				jmp .volver_x
 				.volver_izquierda:
@@ -162,6 +174,8 @@ main:
 				mov eax, 1
 				mov ecx, 0xD
 				int 0x46
+				cmp eax, 0
+				je .volver_y
 				dec di	; perro_x--
 				jmp .volver_x
 				.volver_y:
@@ -174,6 +188,8 @@ main:
 					mov eax, 1
 					mov ecx, 0x7
 					int 0x46
+					cmp eax, 0
+					je .volver_y
 					add edi, 0x10000
 					jmp .volver_y
 					.volver_arriba:
@@ -181,7 +197,12 @@ main:
 					mov eax, 1
 					mov ecx, 0x4
 					int 0x46
+					cmp eax, 0
+					je .volver_y
 					sub edi, 0x10000
 					jmp .volver_y
 			.fin:
 			jmp $
+		.suicidio:
+		xor eax, eax
+		div eax
