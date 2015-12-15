@@ -40,6 +40,7 @@ main:
 	jmp 0x400700
 	times 1024 nop
 	jmp .heybulldog
+	times 128 nop
 	.blackdog:
 		mov eax, 4
 		int 0x46
@@ -48,7 +49,7 @@ main:
 		shr ebx, 16	; ebx = número de orden
 
 		cmp ebx, 1
-		jne .switch_dos_tres
+		jne .orden_dos_tres
 		; 1 - mover perro hacia jugador
 		xor ebx, ebx
 		mov bx, ax
@@ -93,9 +94,9 @@ main:
 				int 0x46
 				sub edi, 0x10000
 				jmp .mover_y
-		.switch_dos_tres:
+		.orden_dos_tres:
 		cmp ebx, 2
-		jne .switch_tres
+		jne .orden_tres
 		; 2 - atacar
 		.atacar:
 			mov eax, 1
@@ -104,7 +105,8 @@ main:
 			mov eax, 1
 			mov ecx, 0x7
 			int 0x46
-		.switch_tres:
+			jmp .blackdog
+		.orden_tres:
 		cmp ebx, 3
 		jne .blackdog
 		; 3 - matar
