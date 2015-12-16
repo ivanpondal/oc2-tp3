@@ -88,7 +88,7 @@ void tss_inicializar_idle() {
 void tss_construir_tarea(perro_t *perro, int index_jugador, int index_tipo){
 	uint cr3 = mmu_inicializar_memoria_perro(perro, index_jugador, index_tipo);
 	uint ebp = CODIGO_BASE + 0xFFF;
-	uint esp = ebp - 12;
+	uint esp = CODIGO_BASE + 0xFF4;
 
 	tss* ptr_tss = (index_jugador == JUGADOR_A) ? &tss_jugadorA[perro->index] : &tss_jugadorB[perro->index];
 

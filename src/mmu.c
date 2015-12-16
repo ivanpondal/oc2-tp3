@@ -110,9 +110,9 @@ uint mmu_inicializar_memoria_perro(perro_t *perro, int index_jugador, int index_
 	mmu_copiar_pagina(direccion_codigo, base_dir_virtual_codigo);
 
 	uint* ptr_base_pila = (uint*)(base_dir_virtual_codigo + 0xFF4);
-	ptr_base_pila[0] = perro->y;
+	ptr_base_pila[0] = 0;
 	ptr_base_pila[1] = perro->x;
-	ptr_base_pila[2] = 0;
+	ptr_base_pila[2] = perro->y;
 
 	mmu_unmapear_pagina(base_dir_virtual_codigo, cr3);
 

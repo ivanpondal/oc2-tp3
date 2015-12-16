@@ -99,6 +99,7 @@ uint game_perro_mover(perro_t *perro, direccion dir)
 			mmu_mapear_pagina_base(CODIGO_BASE, cr3, direccion_nueva_fisica, 0x7, 0x7);
 
 			screen_pintar_perro(perro);
+			return 1;
 		}
 	}
 	return 0;
@@ -159,8 +160,8 @@ uint game_perro_olfatear(perro_t *perro)
     return 0;
 }
 
-uint game_perro_recibir_orden(perro_t *perro, uint jugador_index){
-	if(jugador_index > 1) return 0;
+uint game_perro_recibir_orden(perro_t *perro){
+	int jugador_index = perro->jugador->index;
 	int x = ultima_orden[jugador_index][0];
 	int y = ultima_orden[jugador_index][1];
 	int orden = ultima_orden[jugador_index][2];
